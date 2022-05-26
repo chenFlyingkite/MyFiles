@@ -1,0 +1,97 @@
+plugins {
+    id 'com.android.application'
+}
+
+task MyBuildInfo {
+    int vCode = 137
+    String vName = "1.0.0.${vCode-1}"
+    String name = "MyTosWiki-${vName}-${vCode}"
+
+    //-- Configs
+    ext.versionCode = vCode
+    ext.versionName = vName
+    ext.APK_NAME = "${name}.apk"
+    ext.AAB_NAME = "${name}.aab"
+    ext.MAPPING = "${name}-mapping.txt"
+}
+
+
+android {
+    compileSdk 32
+
+    defaultConfig {
+        applicationId "com.flyingkite.myfiles"
+        minSdk 23
+        targetSdk 32
+        versionCode 1
+        versionName "1.0"
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+
+    signingConfigs {
+        config {
+            keyAlias 'MyAndroidKey'
+            keyPassword 'MyAndroid'
+            storeFile file('../../KeyStores/chenflyingkite.jks')
+            storePassword 'MyAndroid'
+        }
+    }
+
+    // https://developer.android.com/studio/build/optimize-your-build
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.config
+            applicationIdSuffix ".debug"
+
+            // --- Crashlytics --- start
+
+//            firebaseCrashlytics {
+//                // If you don't need crash reporting for your debug build,
+//                // you can speed up your build by disabling mapping file uploading.
+//                mappingFileUploadEnabled false
+//            }
+//
+//            manifestPlaceholders.crashlyticsEnabled = false
+//            // https://developer.android.com/studio/build/optimize-your-build.html#disable_crashlytics
+//            // https://stackoverflow.com/a/49528129
+//            ext.enableCrashlytics = false
+//            // https://docs.fabric.io/android/crashlytics/build-tools.html
+//            // Only use this flag on builds you don't proguard or upload to beta-by-crashlytics
+//            ext.alwaysUpdateBuildId = false
+//            // --- Crashlytics --- end
+        }
+        release {
+            signingConfig signingConfigs.config
+            minifyEnabled true
+            zipAlignEnabled true
+            //jniDebuggable false
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
+            // --- Crashlytics --- start
+//            manifestPlaceholders.crashlyticsEnabled = true
+//            ext.enableCrashlytics = true
+            // --- Crashlytics --- end
+        }
+    }
+}
+
+dependencies {
+    //api fileTree(include: ['*.jar'], dir: 'libs')
+
+    implementation 'androidx.appcompat:appcompat:1.4.1'
+    implementation 'com.google.android.material:material:1.6.0'
+    implementation "androidx.percentlayout:percentlayout:1.0.0"
+    implementation "androidx.recyclerview:recyclerview:1.2.1"
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
+
+    // See usage in https://jitpack.io/
+    //api 'com.github.User:Repo:Tag'
+    String ver = ''
+    ver = "7864a0042f"
+    api "com.github.chenFlyingkite:MyAndroid:$ver"
+}
