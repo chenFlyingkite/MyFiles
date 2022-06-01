@@ -93,5 +93,8 @@ dependencies {
     //api 'com.github.User:Repo:Tag'
     String ver = ''
     ver = "7864a0042f"
-    api "com.github.chenFlyingkite:MyAndroid:$ver"
+    implementation "com.github.chenFlyingkite:MyAndroid:$ver"
+
+    implementation 'com.github.bumptech.glide:glide:4.13.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.13.0'
 }

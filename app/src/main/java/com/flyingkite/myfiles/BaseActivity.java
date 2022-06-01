@@ -1,9 +1,13 @@
 package com.flyingkite.myfiles;
 
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import androidx.annotation.IdRes;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 
 import flyingkite.library.android.log.Loggable;
 
@@ -47,6 +51,12 @@ public class BaseActivity extends AppCompatActivity implements Loggable {
         log("onDestroy()");
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        log("onActivityResult(%s, %s, %s)", requestCode, resultCode, data);
+    }
+
     protected String[] neededPermissions() {
         return new String[0];
     }
@@ -62,5 +72,13 @@ public class BaseActivity extends AppCompatActivity implements Loggable {
             }
             logE("%s for %s", PERMISSION_RESULT_STATE[v + 1], s);
         }
+    }
+
+    protected Fragment findFragmentById(@IdRes int fragmentId) {
+        return getSupportFragmentManager().findFragmentById(fragmentId);
+    }
+
+    protected Fragment findFragmentByTag(String tag) {
+        return getSupportFragmentManager().findFragmentByTag(tag);
     }
 }

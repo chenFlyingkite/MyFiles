@@ -1,144 +1,85 @@
 package com.flyingkite.myfiles;
 
 import android.Manifest;
-import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.flyingkite.myfiles.library.FileFragment;
+
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import flyingkite.library.android.log.Loggable;
+import flyingkite.library.android.util.BackPage;
 import flyingkite.library.androidx.TicTac2;
-import flyingkite.library.androidx.recyclerview.Library;
 import flyingkite.library.androidx.recyclerview.RVAdapter;
 import flyingkite.library.androidx.recyclerview.RVSelectAdapter;
 import flyingkite.library.java.util.FileUtil;
 
 public class MainActivity extends BaseActivity {
 
-    private Library<TRA> diskLib;
     private TicTac2 clock = new TicTac2();
-    private File parent;
-
-
-    private TextView parentFolder;
-    private String state;
+    private FrameLayout frame;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        initDisk();
+        frame = findViewById(R.id.fileFragment);
         reqStorage();
+        replaceFileFragment();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         checkPermissionState();
-        File root = Environment.getExternalStorageDirectory();
-        fileList(root);
     }
 
     @Override
     public void onBackPressed() {
-        File root = Environment.getExternalStorageDirectory();
-        boolean isRoot = root.getAbsolutePath().equals(parent.getAbsolutePath());
-        isRoot = false;
-        if (!isRoot) {
-            fileList(parent.getParentFile());
-            return;
+        Fragment ff = findFragmentById(R.id.fileFragment);
+        if (ff instanceof BackPage) {
+            BackPage b = (BackPage) ff;
+            if (b.onBackPressed()) {
+                return;
+            }
         }
         super.onBackPressed();
     }
 
-    private void initDisk() {
-        diskLib = new Library<>(findViewById(R.id.recyclerDisk), true);
-        List<File> ans = new ArrayList<>();
-        TRA ta = new TRA();
-        ta.setItemListener(new TRA.ItemListener() {
-            @Override
-            public void onClick(File item, TRA.VH holder, int position) {
-                logE("Disk #%s, %s", position, item);
-                fileList(item);
-            }
-        });
-        ta.setDataList(ans);
-        diskLib.setViewAdapter(ta);
-        parentFolder = findViewById(R.id.parentFolder);
-    }
-
-
-    // Android 11 cannot list file in emulated/storage/0 ?
-    // Mis-list the file of emulated/storage/0/a.txt
-    // Access : Allowed to manage all files,
-    // allowed to access media only, not allowed
-    private void fileList(File f) {
-        checkPermissionState();
-        logE("fileList = %s", f);
-        parent = f;
-        updateFile();
-
-        List<File> all = new ArrayList<>();
-        long ms = -1;
-        int dn = -1;
-        int fn = -1;
-        int n = -1;
-        if (f != null) {
-            clock.tic();
-            String[] a = f.list();
-            //sort(a);
-            ms = clock.tac("File listed %s", f);
-            if (a != null) {
-                fn = dn = 0;
-                n = a.length;
-                logE("%s items", a.length);
-                for (int i = 0; i < a.length; i++) {
-                    File fi = new File(f, a[i]);
-                    String k = fi.getAbsolutePath();
-                    logE("#%s : %s", i, fi);
-                    all.add(fi);
-                    if (fi.isFile()) {
-                        fn++;
-                    } else {
-                        dn++;
-                    }
-                }
-            }
-        }
-        state = String.format("%sms %s items = %s D + %s F for %s", ms, n, dn, fn, f);
-        diskLib.adapter.setDataList(all);
-        diskLib.adapter.notifyDataSetChanged();
-        updateFile();
-    }
-
-    private void updateFile() {
-        parentFolder.setText(state);
+    private void replaceFileFragment() {
+        FileFragment f = new FileFragment();
+        FragmentManager fm = getSupportFragmentManager();
+        FragmentTransaction fx = fm.beginTransaction();
+        fx.replace(R.id.fileFragment, f, FileFragment.TAG);
+        fx.commitAllowingStateLoss();
+        fm.executePendingTransactions();
     }
 
     private static final int myFileReq = 123;
 
     @Override
     protected String[] neededPermissions() {
+        // test these
         //String[] permissions = {Manifest.permission_group.STORAGE};
-        String[] permissions = {Manifest.permission.WRITE_EXTERNAL_STORAGE};
         //String[] permissions = {Manifest.permission.MANAGE_EXTERNAL_STORAGE};
         //String[] permissions = {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.MANAGE_EXTERNAL_STORAGE};
-        if (Build.VERSION.SDK_INT >= 30) {
-            // R = 30
+
+        String[] permissions = {Manifest.permission.WRITE_EXTERNAL_STORAGE};
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) { // R = 30
             permissions = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.MANAGE_EXTERNAL_STORAGE};
         }
         return permissions;
@@ -155,15 +96,8 @@ public class MainActivity extends BaseActivity {
         }
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        logE("onActivityResult(%s, %s, %s)", requestCode, resultCode, data);
-    }
-
     private void reqStorage() {
-        if (Build.VERSION.SDK_INT >= 23) {
-            //M = 23
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { // M = 23
             requestPermissions(neededPermissions(), myFileReq);
         }
     }

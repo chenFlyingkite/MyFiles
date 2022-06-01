@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/itemThumb"
+        android:layout_width="@dimen/t50dp"
+        android:layout_height="@dimen/t50dp"
+        android:padding="2dp"
+        android:src="@mipmap/ic_launcher" />
+
+    <RelativeLayout
+        android:id="@+id/sizePart"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/itemThumb"
+        android:layout_alignTop="@id/itemThumb"
+        android:layout_alignBottom="@id/itemThumb"
+        android:layout_alignParentRight="true"
+        android:paddingHorizontal="@dimen/t10dp">
+        <ProgressBar
+            android:id="@+id/itemSizeRate"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+            tools:progress="70"
+            android:max="10000"
+            android:indeterminate="false"/>
+
+        <TextView
+            android:id="@+id/itemSizeB"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            tools:text="3 Bytes"/>
+
+    </RelativeLayout>
+
+    <View
+        android:id="@+id/itemV1"
+        android:layout_width="@dimen/t3dp"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/itemThumb"
+        android:layout_marginRight="@dimen/t5dp"
+        android:background="#080"
+        android:layout_alignBottom="@id/itemThumb"
+        android:layout_toRightOf="@id/itemThumb" />
+
+    <TextView
+        android:id="@+id/itemName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@id/itemV1"
+        android:paddingVertical="@dimen/t5dp"
+        tools:text="File name"/>
+
+    <TextView
+        android:id="@+id/itemInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/itemV1"
+        android:layout_below="@id/itemName"
+        tools:text="information"
+        />
+
+</RelativeLayout>

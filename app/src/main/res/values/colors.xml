@@ -7,4 +7,37 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+    <color name="transparent">#0000</color>
+    <color name="alpha3a">#3a000000</color>
+    <color name="alpha4">#4000</color>
+    <color name="grey3">#333</color>
+    <color name="grey3a">#3a3a3a</color>
+    <color name="grey4">#444</color>
+    <color name="grey6">#666</color>
+    <color name="grey8">#888</color>
+    <color name="greyd">#ddd</color>
+    <color name="skyBlue">#00A2FF</color>
+    <color name="skyBlue2">#2000A2FF</color>
+    <color name="skyBlue4">#4000A2FF</color>
+    <color name="green">#FF198964</color>
+    <color name="green4">#44198964</color>
+    <color name="green8">#88198964</color>
+    <color name="green_">#F1A5</color>
+    <color name="green_4">#41A5</color>
+    <color name="green_8">#81A5</color>
+    <color name="yellow">#FFD4</color>
+    <color name="yellow4">#4FD4</color>
+    <color name="yellow8">#8FD4</color>
+    <color name="red8">#a00</color>
+    <color name="redC33">#c03030</color>
+    <color name="orange">#FF80</color>
+    <color name="orange4">#4F80</color>
+    <color name="orange8">#8F80</color>
+    <color name="brown1">#483119</color>
+    <color name="brown2">#2E1C0D</color>
+    <color name="a1">#0f0</color>
 </resources>
