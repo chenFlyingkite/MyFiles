@@ -83,6 +83,7 @@ android {
 dependencies {
     //api fileTree(include: ['*.jar'], dir: 'libs')
 
+    implementation "androidx.multidex:multidex:2.0.1"
     implementation 'androidx.appcompat:appcompat:1.4.1'
     implementation 'com.google.android.material:material:1.6.0'
     implementation "androidx.percentlayout:percentlayout:1.0.0"
@@ -93,7 +94,11 @@ dependencies {
     //api 'com.github.User:Repo:Tag'
     String ver = ''
     ver = "7864a0042f"
-    implementation "com.github.chenFlyingkite:MyAndroid:$ver"
+    //implementation "com.github.chenFlyingkite:MyAndroid:$ver"
+    api project(":CoreJava")
+    api project(":CoreAndroid")
+    api project(":CoreAndroidX")
+
 
     implementation 'com.github.bumptech.glide:glide:4.13.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.13.0'

@@ -6,16 +6,33 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <Button
-        android:id="@+id/dfsSize"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="DFS Size"/>
+    <HorizontalScrollView
+        android:id="@+id/topbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <Button
+                android:id="@+id/reload"
+                style="@style/button"
+                android:text="更新"/>
+            <Button
+                android:id="@+id/dfsSize"
+                style="@style/button"
+                android:text="DFS Size"/>
+            <Button
+                android:id="@+id/sortBtn"
+                style="@style/button"
+                android:text="Sort"/>
+        </LinearLayout>
+    </HorizontalScrollView>
     <TextView
         android:id="@+id/parentFolder"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/dfsSize"
+        android:layout_below="@id/topbar"
         tools:text="parent folder"/>
 
     <androidx.recyclerview.widget.RecyclerView
@@ -34,7 +51,8 @@
 
     <FrameLayout
         android:id="@+id/frameImage"
-        android:layout_centerInParent="true"
-        android:layout_width="@dimen/t100dp"
-        android:layout_height="@dimen/t100dp"/>
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignTop="@id/recyclerDisk"
+        android:layout_centerInParent="true"/>
 </RelativeLayout>

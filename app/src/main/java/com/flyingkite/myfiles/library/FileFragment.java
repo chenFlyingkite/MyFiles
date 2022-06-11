@@ -1,5 +1,7 @@
 package com.flyingkite.myfiles.library;
 
+import android.graphics.Point;
+import android.media.MediaMetadataRetriever;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
@@ -8,20 +10,30 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.flyingkite.myfiles.FilePreference;
 import com.flyingkite.myfiles.R;
 import com.flyingkite.myfiles.media.ImagePlayer;
+import com.flyingkite.myfiles.media.VideoPlayer;
 
 import java.io.File;
+import java.net.URLConnection;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import flyingkite.library.android.media.MediaMetadataRetrieverUtil;
+import flyingkite.library.android.media.MimeTypeMapUtil;
 import flyingkite.library.android.util.BackPage;
 import flyingkite.library.androidx.TicTac2;
+import flyingkite.library.androidx.recyclerview.CenterScroller;
 import flyingkite.library.androidx.recyclerview.Library;
 import flyingkite.library.java.util.FileUtil;
 
@@ -29,50 +41,135 @@ public class FileFragment extends BaseFragment {
     public static final String TAG = "FileFragment";
 
     private Library<FileAdapter> diskLib;
+    private CenterScroller scroller = new CenterScroller() {
+        @Override
+        public RecyclerView getRecyclerView() {
+            if (diskLib != null) {
+                return diskLib.recyclerView;
+            }
+            return null;
+        }
+    };
     private TicTac2 clock = new TicTac2();
     private File parent;
     private FrameLayout frameImage;
 
 
     private TextView parentFolder;
+    private View reload;
     private View dfsFile;
+    private TextView sortBtn;
 
     private String state;
+    private FilePreference filePref = new FilePreference();
+
+    private boolean unstableScroll = false;
+    private Deque<Point> savedPos = new ArrayDeque<>();
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         initDisk();
         frameImage = findViewById(R.id.frameImage);
 
-        File root = Environment.getExternalStorageDirectory();
-        fileList(root);
+        parent = Environment.getExternalStorageDirectory();
+        reload.callOnClick();
+//        File root = Environment.getExternalStorageDirectory();
+//        fileList(root);
+    }
+
+    private Point makePoint() {
+        Point ans = new Point();
+        RecyclerView.LayoutManager lm = diskLib.recyclerView.getLayoutManager();
+        View v = null;
+        if (lm != null) {
+            v = lm.getChildAt(0);
+        }
+        RecyclerView.ViewHolder vh = null;
+        if (v != null) {
+            vh = diskLib.recyclerView.getChildViewHolder(v);
+        }
+        if (vh != null) {
+            ans.x = vh.getAdapterPosition();
+            ans.y = v.getTop();
+        }
+        logE("makePoint x = %s, v = %s\n, vh = %s\n", ans.x, v, vh);
+        return ans;
+    }
+
+    private void savedPosPush(Point p) {
+        savedPos.push(p);
+    }
+
+    private Point savedPosPop() {
+        if (savedPos.isEmpty()) {
+            return new Point();
+        }
+        return savedPos.pop();
     }
 
     private void initDisk() {
+        reload = findViewById(R.id.reload);
+        reload.setOnClickListener((v) -> {
+            updateSortState();
+            fileList(parent);
+        });
         dfsFile = findViewById(R.id.dfsSize);
         dfsFile.setOnClickListener((v) -> {
             Map<File, Long> spaces = getFileSizes(parent);
             diskLib.adapter.setSpaces(spaces);
             diskLib.adapter.notifyDataSetChanged();
         });
+        sortBtn = findViewById(R.id.sortBtn);
+
+        sortBtn.setOnClickListener((v) -> {
+            filePref.fileListSort.next();
+            reload.callOnClick();
+        });
+
         parentFolder = findViewById(R.id.parentFolder);
 
         diskLib = new Library<>(findViewById(R.id.recyclerDisk), true);
+
         List<File> ans = new ArrayList<>();
         FileAdapter ta = new FileAdapter();
         ta.setItemListener(new FileAdapter.ItemListener() {
             @Override
             public void onClick(File item, FileAdapter.FileVH holder, int position) {
+                String path = item.getAbsolutePath();
                 logE("Disk #%s, %s", position, item);
+                savedPosPush(makePoint());
                 fileList(item);
                 if (item.isFile()) {
-                    openImage(item);
+                    // not support for image
+                    long duration = MediaMetadataRetrieverUtil.extractMetadataFromFilepath(item.getAbsolutePath(), MediaMetadataRetriever.METADATA_KEY_DURATION, -1L);
+                    logE("Duration = %s", duration);
+
+                    boolean isV = MimeTypeMapUtil.getMimeTypeFromExtension("video/", path);
+                    boolean isI = MimeTypeMapUtil.getMimeTypeFromExtension("image/", path);
+                    boolean isA = MimeTypeMapUtil.getMimeTypeFromExtension("audio/", path);
+                    logE("v, i, a = %s, %s, %s", isV, isI, isA);
+                    if (isI) {
+                        openImage(item);
+                    } else if (isV) {
+                        openVideo(item);
+                    } else if (isA) {
+                        openVideo(item);
+                    } else {
+                        openVideo(item);
+                    }
+//                    openImage(item);
+//                    openVideo(item);
                 }
             }
         });
         ta.setDataList(ans);
         diskLib.setViewAdapter(ta);
+    }
 
+    private void updateSortState() {
+        int v = filePref.fileListSort.get();
+        String text = getString(FilePreference.fileListSortBy[v]);
+        sortBtn.setText("Sort = " + text);
     }
 
     private void openImage(File item) {
@@ -82,11 +179,15 @@ public class FileFragment extends BaseFragment {
         ip.setArguments(b);
 
         childFragmentManager_Replace(R.id.frameImage, ip, ImagePlayer.TAG);
-//        FragmentManager fm = getChildFragmentManager();
-//        FragmentTransaction tx = fm.beginTransaction();
-//        tx.replace(R.id.frameImage, ip, ImagePlayer.TAG);
-//        tx.commitAllowingStateLoss();
-        //fm.executePendingTransactions();
+    }
+
+    private void openVideo(File item) {
+        VideoPlayer vp = new VideoPlayer();
+        Bundle b = new Bundle();
+        b.putString(ImagePlayer.BUNDLE_PATH, item.getAbsolutePath());
+        vp.setArguments(b);
+
+        childFragmentManager_Replace(R.id.frameImage, vp, ImagePlayer.TAG);
     }
 
 
@@ -102,7 +203,6 @@ public class FileFragment extends BaseFragment {
     private void fileList(File f) {
         logE("fileList = %s", f);
         parent = f;
-        updateFile();
 
         List<File> all = new ArrayList<>();
         long ms = -1;
@@ -112,7 +212,7 @@ public class FileFragment extends BaseFragment {
         if (f != null) {
             clock.tic();
             clock.tic();
-            String[] a = f.list();
+            File[] a = f.listFiles();
             clock.tac("File listed %s", f);
             clock.tic();
             sort(a);
@@ -123,9 +223,11 @@ public class FileFragment extends BaseFragment {
                 n = a.length;
                 logE("%s items", a.length);
                 for (int i = 0; i < a.length; i++) {
-                    File fi = new File(f, a[i]);
+                    //File fi = new File(f, a[i]);
+                    File fi = a[i];
                     String k = fi.getAbsolutePath();
-                    logE("#%s : %s", i, fi);
+                    String mime = URLConnection.getFileNameMap().getContentTypeFor(k);
+                    logE("#%s : %s %s", i, mime, fi);
                     all.add(fi);
                     if (fi.isFile()) {
                         fn++;
@@ -141,9 +243,13 @@ public class FileFragment extends BaseFragment {
         updateFile();
     }
 
-    private void sort(String[] a) {
+    //
+    // Android\data\jp.naver.line.android\storage\toyboximg\com.linecorp.advertise
+    private void sort(File[] a) {
         if (a != null) {
-            Arrays.sort(a);
+            // Also take the spaces map into consideration for folder size
+            Comparator<File> cmp = FilePreference.getComparatorFileList(diskLib.adapter.getSpaces());
+            Arrays.sort(a, cmp);
         }
     }
 
@@ -163,6 +269,14 @@ public class FileFragment extends BaseFragment {
             File p = parent.getParentFile();
             if (p != null) {
                 fileList(p);
+                Point pp = savedPosPop();
+                if (unstableScroll) {
+                    logE("makePoint pop = %s", pp);
+                    diskLib.recyclerView.postDelayed(() -> {
+                        scroller.scrollToLeft(pp.x);
+                        //scroller.scrollToPercent(pp.x, 0, 30, false);
+                    }, 3000);
+                }
                 return true;
             }
         }

@@ -2,4 +2,13 @@
     <string name="app_name">My Files</string>
 
     <string name="file_item">%s items</string>
+
+    <string name="fileList_Name_A_to_Z">Name (A to Z)</string>
+    <string name="fileList_Name_Z_to_A">Name (Z to A)</string>
+    <string name="fileList_Size_small_to_large">Size (small to large)</string>
+    <string name="fileList_Size_large_to_small">Size (large to small)</string>
+    <string name="fileList_Date_old_to_new">Date (old to new)</string>
+    <string name="fileList_Date_new_to_old">Date (new to old)</string>
+<!--    <string name="fileList_Subfile_few_to_many">Subfile (few to many)</string>-->
+<!--    <string name="fileList_Subfile_many_to_few">Subfile (many to few)</string>-->
 </resources>
