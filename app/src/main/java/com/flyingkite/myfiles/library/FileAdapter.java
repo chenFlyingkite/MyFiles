@@ -73,7 +73,11 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
         vh.itemView.setBackgroundColor(colors[position % colors.length]);
         clock.tac("back");
         clock.tic();
-        Glide.with(vh.thumb).load(it).placeholder(R.mipmap.ic_launcher_round).into(vh.thumb);
+        if (it.isFile()) {
+            Glide.with(vh.thumb).load(it).placeholder(R.mipmap.ic_launcher_round).into(vh.thumb);
+        } else {
+            vh.thumb.setImageResource(R.mipmap.ic_launcher_round);
+        }
         clock.tac("Glide");
         long rate = 0;
         if (spaces.containsKey(it)) {

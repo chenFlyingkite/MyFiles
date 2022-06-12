@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:background="#000"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -9,5 +11,22 @@
         android:layout_centerInParent="true"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
+
+    <TextView
+        android:id="@+id/imageInfo"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:padding="@dimen/t10dp"
+        android:background="#4fff"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+    <ImageView
+        android:id="@+id/imageShare"
+        android:layout_width="@dimen/t50dp"
+        android:layout_height="@dimen/t50dp"
+        android:background="#4800"
+        android:layout_above="@id/imageInfo"
+        android:layout_centerHorizontal="true"/>
+
 
 </RelativeLayout>

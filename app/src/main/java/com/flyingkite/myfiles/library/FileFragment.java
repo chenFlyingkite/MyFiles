@@ -155,7 +155,7 @@ public class FileFragment extends BaseFragment {
                     } else if (isA) {
                         openVideo(item);
                     } else {
-                        openVideo(item);
+                        openImage(item);
                     }
 //                    openImage(item);
 //                    openVideo(item);

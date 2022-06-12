@@ -9,6 +9,13 @@
     <string name="fileList_Size_large_to_small">Size (large to small)</string>
     <string name="fileList_Date_old_to_new">Date (old to new)</string>
     <string name="fileList_Date_new_to_old">Date (new to old)</string>
+
+    <string name="fileInfo_Date_Modified">Date Modified : %s</string>
+    <string name="fileInfo_Date_Added">Date added : %s</string>
+
+    <string name="share_to">分享到&#8230;</string>
+    <string name="share">分享</string>
+
 <!--    <string name="fileList_Subfile_few_to_many">Subfile (few to many)</string>-->
 <!--    <string name="fileList_Subfile_many_to_few">Subfile (many to few)</string>-->
 </resources>

@@ -11,4 +11,20 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
+    <TextView
+        android:id="@+id/videoInfo"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:padding="@dimen/t10dp"
+        android:background="#4fff"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+    <ImageView
+        android:id="@+id/videoShare"
+        android:layout_width="@dimen/t50dp"
+        android:layout_height="@dimen/t50dp"
+        android:background="#4800"
+        android:layout_above="@id/videoInfo"
+        android:layout_centerHorizontal="true"/>
+
 </RelativeLayout>
