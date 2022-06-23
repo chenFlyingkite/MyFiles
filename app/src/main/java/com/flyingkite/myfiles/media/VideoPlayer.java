@@ -14,6 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.flyingkite.myfiles.R;
+import com.flyingkite.myfiles.ShareUtil;
 import com.flyingkite.myfiles.library.BaseFragment;
 
 import java.text.SimpleDateFormat;
@@ -63,7 +64,7 @@ public class VideoPlayer extends BaseFragment {
                 mime = cursorMap.get(MediaStore.Images.ImageColumns.MIME_TYPE);
             }
             Uri uri = Uri.parse(videoPath);
-            ImagePlayer.sendUriIntent(c, uri, mime);
+            ShareUtil.sendUriIntent(c, uri, mime);
         });
     }
 

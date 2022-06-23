@@ -12,6 +12,14 @@
         android:padding="2dp"
         android:src="@mipmap/ic_launcher" />
 
+    <ImageView
+        android:id="@+id/itemAction"
+        android:layout_width="@dimen/t40dp"
+        android:layout_height="@dimen/t40dp"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:src="@mipmap/ic_launcher_round"/>
+
     <RelativeLayout
         android:id="@+id/sizePart"
         android:layout_width="wrap_content"
@@ -19,7 +27,7 @@
         android:layout_toRightOf="@id/itemThumb"
         android:layout_alignTop="@id/itemThumb"
         android:layout_alignBottom="@id/itemThumb"
-        android:layout_alignParentRight="true"
+        android:layout_toLeftOf="@id/itemAction"
         android:paddingHorizontal="@dimen/t10dp">
         <ProgressBar
             android:id="@+id/itemSizeRate"
@@ -67,5 +75,6 @@
         android:layout_below="@id/itemName"
         tools:text="information"
         />
+
 
 </RelativeLayout>

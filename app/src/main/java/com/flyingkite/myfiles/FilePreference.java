@@ -1,65 +1,59 @@
 package com.flyingkite.myfiles;
 
+import android.util.Pair;
+
 import java.io.File;
+import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 
 import flyingkite.library.android.log.Loggable;
 import flyingkite.library.android.preference.EasyPreference;
-import flyingkite.library.java.util.MathUtil;
 
 public class FilePreference extends EasyPreference {
     public FilePreference() {
         super(App.me, "FilePreference");
     }
 
-    public NextPref fileListSort = new NextPref("fileListSort", fileListSortBy.length);
+    public StringPref fileSort = new StringPref("fileSort", App.me.getString(R.string.nameAZ));
 
-    public class NextPref extends IntPref {
-        private int count;
-        public NextPref(String _key, int _count) {
-            super(_key);
-            count = _count;
-        }
+    public static final List<Pair<Integer, String>> fileSortBy = Arrays.asList(
+            of(R.string.fileList_Name_A_to_Z, R.string.nameAZ),
+            of(R.string.fileList_Name_Z_to_A, R.string.nameZA),
+            of(R.string.fileList_Size_small_to_large, R.string.size01),
+            of(R.string.fileList_Size_large_to_small, R.string.size10),
+            of(R.string.fileList_Date_old_to_new, R.string.date01),
+            of(R.string.fileList_Date_new_to_old, R.string.date10)
+    );
 
-        public NextPref(String _key, int defValue, int _count) {
-            super(_key, defValue);
-            count = _count;
-        }
-
-        public int next() {
-            return move(1);
-        }
-
-        public int prev() {
-            return move(count - 1);
-        }
-
-        public int move(int x) {
-            int v = get();
-            int next = (v + x) % count;
-            set(next);
-            return next;
-        }
+    private static Pair<Integer, String> of(int id, int keyID) {
+        return new Pair<>(id, App.me.getString(keyID));
     }
-
-    public static final int[] fileListSortBy = {
-            R.string.fileList_Name_A_to_Z,
-            R.string.fileList_Name_Z_to_A,
-            R.string.fileList_Size_small_to_large,
-            R.string.fileList_Size_large_to_small,
-            R.string.fileList_Date_old_to_new,
-            R.string.fileList_Date_new_to_old,
-    };
 
     private static Loggable z = new Loggable() {
     };
 
+    private static int findSort(String key) {
+        for (int i = 0; i < fileSortBy.size(); i++) {
+            if (fileSortBy.get(i).second.equals(key)) {
+                return i;
+            }
+        }
+        return 0;
+    }
+
+    public static String sortString() {
+        FilePreference pref = new FilePreference();
+        int at = findSort(pref.fileSort.get());
+        return App.me.getString(fileSortBy.get(at).first);
+    }
+
     public static Comparator<File> getComparatorFileList(Map<File, ?> info) {
         FilePreference pref = new FilePreference();
-        int k = pref.fileListSort.get();
-        k = MathUtil.makeInRange(k, 0, fileListSortBy.length);
-        int sort = fileListSortBy[k];
+        String key = pref.fileSort.get();
+        int k = findSort(key);
+        int sort = fileSortBy.get(k).first;
         if (sort == R.string.fileList_Date_old_to_new || sort == R.string.fileList_Date_new_to_old) {
             return new Comparator<>() {
                 private long base(File f) {

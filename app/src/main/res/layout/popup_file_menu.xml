@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="#d333">
+        <TextView
+            android:id="@+id/itemName"
+            style="@style/text_menu2"
+            android:text=""/>
+        <TextView
+            style="@style/text_menu2"
+            android:text="@string/file_menu_select"/>
+        <TextView
+            style="@style/text_menu2"
+            android:text="@string/file_menu_share"/>
+        <TextView
+            style="@style/text_menu2"
+            android:text="@string/file_menu_open_with"/>
+        <TextView
+            style="@style/text_menu2"
+            android:text="@string/file_menu_move_to"/>
+        <TextView
+            style="@style/text_menu2"
+            android:text="@string/file_menu_copy_to"/>
+        <TextView
+            style="@style/text_menu2"
+            android:text="@string/file_menu_rename"/>
+        <TextView
+            style="@style/text_menu2"
+            android:text="@string/file_menu_delete"/>
+        <TextView
+            style="@style/text_menu2"
+            android:text="@string/file_menu_info"/>
+    </LinearLayout>
+</ScrollView>

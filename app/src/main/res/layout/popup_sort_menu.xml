@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="#d333">
+    <RadioGroup
+        android:id="@+id/sortGroup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <RadioButton
+            style="@style/text_menu"
+            android:tag="@string/nameAZ"
+            android:text="@string/fileList_Name_A_to_Z"/>
+        <RadioButton
+            style="@style/text_menu"
+            android:tag="@string/nameZA"
+            android:text="@string/fileList_Name_Z_to_A"/>
+        <RadioButton
+            style="@style/text_menu"
+            android:tag="@string/size01"
+            android:text="@string/fileList_Size_small_to_large"/>
+        <RadioButton
+            style="@style/text_menu"
+            android:tag="@string/size10"
+            android:text="@string/fileList_Size_large_to_small"/>
+        <RadioButton
+            style="@style/text_menu"
+            android:tag="@string/date01"
+            android:text="@string/fileList_Date_old_to_new"/>
+        <RadioButton
+            style="@style/text_menu"
+            android:tag="@string/date10"
+            android:text="@string/fileList_Date_new_to_old"/>
+    </RadioGroup>
+</LinearLayout>

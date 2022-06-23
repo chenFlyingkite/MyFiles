@@ -1,12 +1,20 @@
 package com.flyingkite.myfiles.library;
 
+import android.content.Context;
 import android.graphics.Point;
 import android.media.MediaMetadataRetriever;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Pair;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.PopupWindow;
+import android.widget.RadioGroup;
 import android.widget.TextView;
+import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -14,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.flyingkite.myfiles.FilePreference;
 import com.flyingkite.myfiles.R;
+import com.flyingkite.myfiles.ShareUtil;
 import com.flyingkite.myfiles.media.ImagePlayer;
 import com.flyingkite.myfiles.media.VideoPlayer;
 
@@ -22,10 +31,8 @@ import java.net.URLConnection;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Deque;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -54,7 +61,6 @@ public class FileFragment extends BaseFragment {
     private File parent;
     private FrameLayout frameImage;
 
-
     private TextView parentFolder;
     private View reload;
     private View dfsFile;
@@ -63,6 +69,7 @@ public class FileFragment extends BaseFragment {
     private String state;
     private FilePreference filePref = new FilePreference();
 
+    private Pair<View, PopupWindow> sortMenu;
     private boolean unstableScroll = false;
     private Deque<Point> savedPos = new ArrayDeque<>();
 
@@ -107,6 +114,12 @@ public class FileFragment extends BaseFragment {
         return savedPos.pop();
     }
 
+    private void share(Uri uri, String mime) {
+        Context c = getContext();
+        if (c == null) return;
+        ShareUtil.sendUriIntent(c, getString(R.string.share_to), uri, mime);
+    }
+
     private void initDisk() {
         reload = findViewById(R.id.reload);
         reload.setOnClickListener((v) -> {
@@ -122,8 +135,7 @@ public class FileFragment extends BaseFragment {
         sortBtn = findViewById(R.id.sortBtn);
 
         sortBtn.setOnClickListener((v) -> {
-            filePref.fileListSort.next();
-            reload.callOnClick();
+            showSortMenu(v);
         });
 
         parentFolder = findViewById(R.id.parentFolder);
@@ -144,9 +156,9 @@ public class FileFragment extends BaseFragment {
                     long duration = MediaMetadataRetrieverUtil.extractMetadataFromFilepath(item.getAbsolutePath(), MediaMetadataRetriever.METADATA_KEY_DURATION, -1L);
                     logE("Duration = %s", duration);
 
-                    boolean isV = MimeTypeMapUtil.getMimeTypeFromExtension("video/", path);
-                    boolean isI = MimeTypeMapUtil.getMimeTypeFromExtension("image/", path);
-                    boolean isA = MimeTypeMapUtil.getMimeTypeFromExtension("audio/", path);
+                    boolean isV = MimeTypeMapUtil.isPrefixOfWithMimeTypeFromExtension("video/", path);
+                    boolean isI = MimeTypeMapUtil.isPrefixOfWithMimeTypeFromExtension("image/", path);
+                    boolean isA = MimeTypeMapUtil.isPrefixOfWithMimeTypeFromExtension("audio/", path);
                     logE("v, i, a = %s, %s, %s", isV, isI, isA);
                     if (isI) {
                         openImage(item);
@@ -161,14 +173,91 @@ public class FileFragment extends BaseFragment {
 //                    openVideo(item);
                 }
             }
+
+            @Override
+            public boolean onLongClick(File item, FileAdapter.FileVH holder, int position) {
+                Uri uri = Uri.fromFile(item);
+                String mime = MimeTypeMapUtil.getMimeTypeFromExtension(item.getAbsolutePath());
+                share(uri, mime);
+                return true;
+            }
+
+            @Override
+            public void onAction(File item, FileAdapter.FileVH vh, int position) {
+                // TODO
+                logE("show drop down %s", item);
+                Pair<View, PopupWindow> pair = createPopupWindow(R.layout.popup_file_menu, getView());
+                TextView txt = pair.first.findViewById(R.id.itemName);
+                txt.setText(item.toString());
+                pair.second.showAsDropDown(vh.action);
+                // For folders :
+                // select
+                // move to
+                // copy to
+                // rename
+                // permanent delete
+                // info
+
+                // For files :
+                // select
+                // share
+                // open with
+                // move to
+                // copy to
+                // rename
+                // add to favorite
+                // trash
+                // safe folder
+                // permanent delete
+                // info
+            }
         });
         ta.setDataList(ans);
         diskLib.setViewAdapter(ta);
     }
 
+    private void showSortMenu(View anchor) {
+        if (sortMenu == null) {
+            Pair<View, PopupWindow> pair = createPopupWindow(R.layout.popup_sort_menu, getView());
+            View vs = pair.first;
+            RadioGroup rg = vs.findViewById(R.id.sortGroup);
+            int id = RadioGroup.NO_ID;
+            for (int i = 0; i < rg.getChildCount(); i++) {
+                View vi = rg.getChildAt(i);
+                String tag = vi.getTag() + "";
+                vi.setOnClickListener((v) -> {
+                    filePref.fileSort.set(tag);
+                    reload.callOnClick();
+                });
+                if (filePref.fileSort.get().equals(tag)) {
+                    id = vi.getId();
+                }
+            }
+            rg.check(id);
+            sortMenu = pair;
+        }
+        sortMenu.second.showAsDropDown(anchor);
+    }
+
+    /**
+     * @return pair of inflated menu view & popup window
+     */
+    private Pair<View, PopupWindow> createPopupWindow(@LayoutRes int layoutId, View root) {
+        ViewGroup vg = null;
+        if (root instanceof ViewGroup) {
+            vg = (ViewGroup) root;
+        }
+        // Create MenuWindow
+        View menu = LayoutInflater.from(getActivity()).inflate(layoutId, null, false);
+        int wrap = ViewGroup.LayoutParams.WRAP_CONTENT;
+        PopupWindow w = new PopupWindow(menu, wrap, wrap, true);
+        w.setOutsideTouchable(true);
+        //w.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));// still transparent
+        return new Pair<>(menu, w);
+    }
+
     private void updateSortState() {
-        int v = filePref.fileListSort.get();
-        String text = getString(FilePreference.fileListSortBy[v]);
+        String text = FilePreference.sortString();
         sortBtn.setText("Sort = " + text);
     }
 
@@ -189,7 +278,6 @@ public class FileFragment extends BaseFragment {
 
         childFragmentManager_Replace(R.id.frameImage, vp, ImagePlayer.TAG);
     }
-
 
     @Override
     public void onResume() {
@@ -239,6 +327,7 @@ public class FileFragment extends BaseFragment {
         }
         state = String.format("%sms %s items = %s D + %s F for %s", ms, n, dn, fn, f);
         diskLib.adapter.setDataList(all);
+        //diskLib.adapter.notifyItemRangeChanged(0, diskLib.adapter.getItemCount()); // x
         diskLib.adapter.notifyDataSetChanged();
         updateFile();
     }
@@ -283,100 +372,14 @@ public class FileFragment extends BaseFragment {
         return false;
     }
 
-    // TODO into MyAndroid
     private Map<File, Long> getFileSizes(File root) {
-        Map<File, Long> map = new HashMap<>();
-        TicTac2 clk = new TicTac2();
-        clk.tic();
-        dfsFileSize(root, new OnDFSFile() {
+        Map<File, Long> map = FileUtil.getFileSizeMap(root, new FileUtil.OnDFSFile() {
             @Override
             public void onStart(File f) {
-                clk.tic();
-            }
-
-            @Override
-            public void onComplete(File f, long size) {
-                clk.tac("File sized %s on %s", FileUtil.toGbMbKbB(size), f);
-                if ("/storage/emulated/0/Android/data/jp.naver.line.android/storage".equals(f.getAbsolutePath())) {
-                    logE("X_X %s, %s, %s", size, FileUtil.toGbMbKbB(size), diskLib.adapter.toGbMbKbB(size));
-                }
-                map.put(f, size);
+                // empty
             }
         });
-        clk.tac("dfsFileSize %s", root);
-        List<File> keys = new ArrayList<>(map.keySet());
-        Collections.sort(keys);
-        logE("%s keys", keys.size());
-        for (int i = 0; i < keys.size(); i++) {
-            File key = keys.get(i);
-            long val = map.get(key);
-            String s = FileUtil.toGbMbKbB(val);
-            String par = "";
-            if (key.equals(root) == false) {
-                File pa = key.getParentFile();
-                long pz = map.get(pa);
-                double pr = 10000F * val / pz;
-                par = _fmt("(%.1f%% %%) ", pr);
-            }
-            String x = _fmt("%11s %13s", s, par);
-            logE("#%5s : %s = %s", i, x, key);
-        }
         return map;
-    }
-
-    // TODO into MyAndroid
-    private interface OnDFSFile {
-        void onStart(File f);
-        default File[] onFileListed(File root, File[] sub) { return sub; }
-        default void onFileSize(File f, long size) { }
-        void onComplete(File f, long size);
-    }
-
-    // TODO into MyAndroid
-    private long dfsFileSize(File f, OnDFSFile lis) {
-        long ans = 0;
-        if (f == null) {
-            return ans;
-        }
-        if (lis != null) {
-            lis.onStart(f);
-        }
-        if (f.isDirectory()) {
-            File[] sub = f.listFiles();
-            // lis
-            if (lis != null) {
-                sub = lis.onFileListed(f, sub);
-            }
-            // core
-            if (sub != null) {
-                for (int i = 0; i < sub.length; i++) {
-                    File g = sub[i];
-                    long it = dfsFileSize(g, lis);
-                    ans += it;
-                }
-            }
-            // lis
-            if (lis != null) {
-                lis.onFileSize(f, ans);
-            }
-        } else {
-            // lis
-            if (lis != null) {
-                lis.onFileListed(f, null);
-            }
-            // core
-            ans = f.length();
-            // lis
-            if (lis != null) {
-                lis.onFileSize(f, ans);
-            }
-        }
-
-        // notify its state
-        if (lis != null) {
-            lis.onComplete(f, ans);
-        }
-        return ans;
     }
 
     private void updateFile() {

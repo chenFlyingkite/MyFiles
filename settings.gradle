@@ -19,10 +19,4 @@ if (1 > 0) {
         include(":${x}")
         project(":${x}").setProjectDir(new File("../MyAndroid/${x}"))
     }
-//    include ':CoreJava'
-//    project(':CoreJava').setProjectDir(new File("../MyAndroid/CoreJava"))
-//    include ':CoreAndroid'
-//    project(':CoreAndroid').setProjectDir(new File("../MyAndroid/CoreAndroid"))
-//    include ':CoreAndroidX'
-//    project(':CoreAndroidX').setProjectDir(new File("../MyAndroid/CoreAndroidX"))
 }

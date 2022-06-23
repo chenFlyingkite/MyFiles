@@ -27,6 +27,14 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
 
     public interface ItemListener extends RVAdapter.ItemListener<File, FileVH> {
 
+        default boolean onLongClick(File item, FileVH holder, int position) {
+            return false;
+        }
+
+        default void onAction(File item, FileVH vh, int position) {
+
+        }
+
     }
 
     // Color.WHITE, Color.RED, Color.GREEN, Color.BLUE, Color.CYAN, Color.YELLOW, Color.MAGENTA
@@ -98,6 +106,17 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
         }
         vh.sizeRate.setProgress((int) rate);
         clock.tac("#onBind %s : %s", position, it);
+        vh.itemView.setOnLongClickListener((v) -> {
+            if (onItem != null) {
+                return onItem.onLongClick(it, vh, position);
+            }
+            return false;
+        });
+        vh.action.setOnClickListener((v) -> {
+            if (onItem != null) {
+                onItem.onAction(it, vh, position);
+            }
+        });
     }
 
     private String info(File f, int at) {
@@ -122,7 +141,7 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
             clock.tac("size %s", si);
         }
 
-        return _fmt("#%d : %s, %s", at, si, time);
+        return _fmt("#%d : %s, %s", at, time, si);
     }
 
     // TODO FIX MyAndroid
@@ -167,6 +186,7 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
         public TextView name;
         public TextView sizeB;
         public ImageView thumb;
+        public View action;
         public ProgressBar sizeRate;
 
         public FileVH(@NonNull View v) {
@@ -175,6 +195,7 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
             name = v.findViewById(R.id.itemName);
             sizeB = v.findViewById(R.id.itemSizeB);
             thumb = v.findViewById(R.id.itemThumb);
+            action = v.findViewById(R.id.itemAction);
             sizeRate = v.findViewById(R.id.itemSizeRate);
         }
     }

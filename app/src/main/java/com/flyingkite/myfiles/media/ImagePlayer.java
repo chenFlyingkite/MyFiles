@@ -1,8 +1,6 @@
 package com.flyingkite.myfiles.media;
 
-import android.content.ActivityNotFoundException;
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -15,6 +13,7 @@ import androidx.annotation.Nullable;
 
 import com.bumptech.glide.Glide;
 import com.flyingkite.myfiles.R;
+import com.flyingkite.myfiles.ShareUtil;
 import com.flyingkite.myfiles.library.BaseFragment;
 
 import java.text.SimpleDateFormat;
@@ -70,7 +69,7 @@ public class ImagePlayer extends BaseFragment {
                 mime = cursorMap.get(MediaStore.Images.ImageColumns.MIME_TYPE);
             }
             Uri uri = Uri.parse(imagePath);
-            sendUriIntent(c, uri, mime);
+            ShareUtil.sendUriIntent(c, uri, mime);
         });
     }
 
@@ -156,13 +155,13 @@ public class ImagePlayer extends BaseFragment {
         }
 
         String ori = it.get(MediaStore.Images.ImageColumns.ORIENTATION);
+        String ans = "";
         if ("90".equals(ori) || "270".equals(ori)) {
-            String h = it.get(MediaStore.Images.ImageColumns.HEIGHT);
-            return h;
+            ans = it.get(MediaStore.Images.ImageColumns.HEIGHT);
         } else {
-            String w = it.get(MediaStore.Images.ImageColumns.WIDTH);
-            return w;
+            ans = it.get(MediaStore.Images.ImageColumns.WIDTH);
         }
+        return ans;
     }
 
     private String getHeight(Map<String, String> it) {
@@ -171,13 +170,13 @@ public class ImagePlayer extends BaseFragment {
         }
 
         String ori = it.get(MediaStore.Images.ImageColumns.ORIENTATION);
+        String ans = "";
         if ("90".equals(ori) || "270".equals(ori)) {
-            String w = it.get(MediaStore.Images.ImageColumns.WIDTH);
-            return w;
+            ans = it.get(MediaStore.Images.ImageColumns.WIDTH);
         } else {
-            String h = it.get(MediaStore.Images.ImageColumns.HEIGHT);
-            return h;
+            ans = it.get(MediaStore.Images.ImageColumns.HEIGHT);
         }
+        return ans;
     }
 
     @Override
@@ -218,33 +217,6 @@ public class ImagePlayer extends BaseFragment {
         @Override
         public void onError(Exception error) {
             logE("X_X failed %s", error);
-        }
-    }
-
-
-    public static void sendUriIntent(@NonNull Context context, Uri uri, String type) {
-        sendUriIntent(context, shareTo(context), uri, type);
-    }
-
-    // i18n text string for share title
-    public static String shareTo(Context context) {
-        return context.getString(R.string.share_to);
-    }
-
-    public static void sendUriIntent(@NonNull Context context, String title, Uri uri, String type) {
-        Intent it = new Intent(Intent.ACTION_SEND);
-        it.putExtra(Intent.EXTRA_STREAM, uri);
-        int flg = Intent.FLAG_GRANT_READ_URI_PERMISSION;
-        //flg |= Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
-        it.addFlags(flg);
-        //it.setClipData(ClipData.newRawUri("", uri));
-        //it.setData(uri);
-        it.setDataAndType(uri, type);
-        //z.logE("sendUriIntent %s %s", type, uri);
-        try {
-            context.startActivity(Intent.createChooser(it, title));
-        } catch (ActivityNotFoundException e) {
-            e.printStackTrace();
         }
     }
 }

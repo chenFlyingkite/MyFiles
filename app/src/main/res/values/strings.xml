@@ -16,6 +16,20 @@
     <string name="share_to">分享到&#8230;</string>
     <string name="share">分享</string>
 
-<!--    <string name="fileList_Subfile_few_to_many">Subfile (few to many)</string>-->
-<!--    <string name="fileList_Subfile_many_to_few">Subfile (many to few)</string>-->
+    <string name="file_menu_select">選擇</string>
+    <string name="file_menu_share">分享</string>
+    <string name="file_menu_open_with">以其他開啟</string>
+    <string name="file_menu_move_to">移動到</string>
+    <string name="file_menu_copy_to">複製到</string>
+    <string name="file_menu_rename">重新命名</string>
+    <string name="file_menu_delete">刪除</string>
+    <string name="file_menu_info">檔案資訊</string>
+
+    <!-- No translation -->
+    <string name="nameAZ">nameAZ</string>
+    <string name="nameZA">nameZA</string>
+    <string name="size01">size01</string>
+    <string name="size10">size10</string>
+    <string name="date01">date01</string>
+    <string name="date10">date10</string>
 </resources>
