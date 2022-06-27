@@ -192,7 +192,7 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
         public FileVH(@NonNull View v) {
             super(v);
             info = v.findViewById(R.id.itemInfo);
-            name = v.findViewById(R.id.itemName);
+            name = v.findViewById(R.id.itemTitle);
             sizeB = v.findViewById(R.id.itemSizeB);
             thumb = v.findViewById(R.id.itemThumb);
             action = v.findViewById(R.id.itemAction);

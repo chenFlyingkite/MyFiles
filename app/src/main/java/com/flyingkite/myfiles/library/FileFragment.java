@@ -1,6 +1,7 @@
 package com.flyingkite.myfiles.library;
 
-import android.content.Context;
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.graphics.Point;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
@@ -10,6 +11,7 @@ import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.PopupWindow;
 import android.widget.RadioGroup;
@@ -20,6 +22,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.flyingkite.myfiles.App;
 import com.flyingkite.myfiles.FilePreference;
 import com.flyingkite.myfiles.R;
 import com.flyingkite.myfiles.ShareUtil;
@@ -39,7 +42,12 @@ import java.util.Map;
 import flyingkite.library.android.media.MediaMetadataRetrieverUtil;
 import flyingkite.library.android.media.MimeTypeMapUtil;
 import flyingkite.library.android.util.BackPage;
+import flyingkite.library.android.util.DialogUtil;
+import flyingkite.library.android.util.ThreadUtil;
 import flyingkite.library.androidx.TicTac2;
+import flyingkite.library.androidx.mediastore.listener.DataListener;
+import flyingkite.library.androidx.mediastore.request.MediaRequest;
+import flyingkite.library.androidx.mediastore.store.StoreFiles;
 import flyingkite.library.androidx.recyclerview.CenterScroller;
 import flyingkite.library.androidx.recyclerview.Library;
 import flyingkite.library.java.util.FileUtil;
@@ -79,9 +87,6 @@ public class FileFragment extends BaseFragment {
         frameImage = findViewById(R.id.frameImage);
 
         parent = Environment.getExternalStorageDirectory();
-        reload.callOnClick();
-//        File root = Environment.getExternalStorageDirectory();
-//        fileList(root);
     }
 
     private Point makePoint() {
@@ -114,10 +119,28 @@ public class FileFragment extends BaseFragment {
         return savedPos.pop();
     }
 
-    private void share(Uri uri, String mime) {
-        Context c = getContext();
-        if (c == null) return;
-        ShareUtil.sendUriIntent(c, getString(R.string.share_to), uri, mime);
+
+    private void openWith(File file) {
+        Activity a = getActivity();
+        if (a == null) return;
+        Uri uri = Uri.fromFile(file); // also ok?
+        //Uri uri = App.getUriForFile(file);
+        logE("openWith uri = %s", uri);
+        String mime = MimeTypeMapUtil.getMimeTypeFromExtension(file.getAbsolutePath());
+        ShareUtil.openUriIntent(a, uri, mime);
+    }
+
+    private void share(File file) {
+        Activity a = getActivity();
+        if (a == null) return;
+        Uri uri = App.getUriForFile(file);
+        logE("share uri = %s", uri);
+        String mime = MimeTypeMapUtil.getMimeTypeFromExtension(file.getAbsolutePath());
+        ShareUtil.sendUriIntent(a, uri, mime);
+    }
+
+    private void reloadMe() {
+        reload.callOnClick();
     }
 
     private void initDisk() {
@@ -176,9 +199,7 @@ public class FileFragment extends BaseFragment {
 
             @Override
             public boolean onLongClick(File item, FileAdapter.FileVH holder, int position) {
-                Uri uri = Uri.fromFile(item);
-                String mime = MimeTypeMapUtil.getMimeTypeFromExtension(item.getAbsolutePath());
-                share(uri, mime);
+                share(item);
                 return true;
             }
 
@@ -187,8 +208,7 @@ public class FileFragment extends BaseFragment {
                 // TODO
                 logE("show drop down %s", item);
                 Pair<View, PopupWindow> pair = createPopupWindow(R.layout.popup_file_menu, getView());
-                TextView txt = pair.first.findViewById(R.id.itemName);
-                txt.setText(item.toString());
+                initActions(pair.first, item);
                 pair.second.showAsDropDown(vh.action);
                 // For folders :
                 // select
@@ -216,6 +236,110 @@ public class FileFragment extends BaseFragment {
         diskLib.setViewAdapter(ta);
     }
 
+    private void initActions(View w, File item) {
+        // file name
+        TextView txt = w.findViewById(R.id.itemTitle);
+        txt.setText(item.toString());
+        w.findViewById(R.id.itemShare).setOnClickListener((v) -> {
+            share(item);
+        });
+        w.findViewById(R.id.itemOpenWith).setOnClickListener((v) -> {
+            openWith(item);
+        });
+        w.findViewById(R.id.itemRename).setOnClickListener((v) -> {
+            Activity a = getActivity();
+            if (a == null) {
+                return;
+            }
+
+            new DialogUtil.Alert(a, R.layout.dialog_rename, 0, new DialogUtil.InflateListener() {
+                @Override
+                public void onFinishInflate(View view, AlertDialog dialog) {
+                    EditText edit = view.findViewById(R.id.itemInput);
+                    edit.setText(item.getName());
+
+                    view.findViewById(R.id.itemCancel).setOnClickListener((vv) -> {
+                        dialog.dismiss();
+                    });
+                    view.findViewById(R.id.itemOK).setOnClickListener((vv) -> {
+                        File next = new File(item.getParent(), edit.getText().toString());
+                        boolean ok = item.renameTo(next);
+                        logE("rename ok = %s", ok);
+                        logE("old = %s\nnew = %s", item, next);
+                        dialog.dismiss();
+                        reloadMe();
+                    });
+                }
+            }).buildAndShow();
+        });
+        w.findViewById(R.id.itemDelete).setOnClickListener((v) -> {
+            Activity a = getActivity();
+            if (a == null) {
+                return;
+            }
+
+            new DialogUtil.Alert(a, R.layout.dialog_message, 0, new DialogUtil.InflateListener() {
+                @Override
+                public void onFinishInflate(View view, AlertDialog dialog) {
+//                    init(view, dialog);
+//                }
+//
+//                private void init(View view, AlertDialog dialog) {
+                    TextView t;
+                    t = view.findViewById(R.id.itemTitle);
+                    t.setText(getString(R.string.delete_title, item.getName()));
+                    t = view.findViewById(R.id.itemMessage);
+                    t.setText(getString(R.string.delete_title_confirm, item.getAbsolutePath()));
+
+                    view.findViewById(R.id.itemOK).setOnClickListener((v) -> {
+                        boolean ok = FileUtil.ensureDelete(item);
+                        logE("ok = %s, for %s", ok, item);
+                        reloadMe();
+                        dialog.dismiss();
+                    });
+                    view.findViewById(R.id.itemCancel).setOnClickListener((v) -> {
+                        dialog.dismiss();
+                    });
+                }
+            }).buildAndShow();
+        });
+        w.findViewById(R.id.itemFileInfo).setOnClickListener((v) -> {
+            Activity a = getActivity();
+            if (a == null) {
+                return;
+            }
+            new DialogUtil.Alert(a, R.layout.dialog_message, 0, new DialogUtil.InflateListener() {
+                @Override
+                public void onFinishInflate(View view, AlertDialog dialog) {
+                    TextView t = null;
+                    t = view.findViewById(R.id.itemTitle);
+                    t.setText(item.getAbsolutePath());
+                    StoreFiles sf = new StoreFiles(a);
+                    MediaRequest r = sf.newRequest();
+                    r.listener = new DataListener<Map<String, String>>() {
+
+                        @Override
+                        public void onError(Exception error) {
+                            logE("error = %s", error);
+                        }
+
+                        @Override
+                        public void onComplete(List<Map<String, String>> all) {
+                            logE("all %s, %s, %s", all.size(), all.get(0).size(), all.get(0).keySet());
+                            logE("all %s", all);
+                            ThreadUtil.runOnUiThread(() -> {
+                                String m = all.toString();
+                                TextView t = view.findViewById(R.id.itemMessage);
+                                t.setText(m);
+                            });
+                        }
+                    };
+                    sf.queryItem(item.getAbsolutePath(), r);
+                }
+            }).buildAndShow();
+        });
+    }
+
     private void showSortMenu(View anchor) {
         if (sortMenu == null) {
             Pair<View, PopupWindow> pair = createPopupWindow(R.layout.popup_sort_menu, getView());
@@ -227,7 +351,7 @@ public class FileFragment extends BaseFragment {
                 String tag = vi.getTag() + "";
                 vi.setOnClickListener((v) -> {
                     filePref.fileSort.set(tag);
-                    reload.callOnClick();
+                    reloadMe();
                 });
                 if (filePref.fileSort.get().equals(tag)) {
                     id = vi.getId();
@@ -248,7 +372,7 @@ public class FileFragment extends BaseFragment {
             vg = (ViewGroup) root;
         }
         // Create MenuWindow
-        View menu = LayoutInflater.from(getActivity()).inflate(layoutId, null, false);
+        View menu = LayoutInflater.from(getActivity()).inflate(layoutId, vg, false);
         int wrap = ViewGroup.LayoutParams.WRAP_CONTENT;
         PopupWindow w = new PopupWindow(menu, wrap, wrap, true);
         w.setOutsideTouchable(true);
@@ -282,6 +406,7 @@ public class FileFragment extends BaseFragment {
     @Override
     public void onResume() {
         super.onResume();
+        reloadMe();
     }
 
     // Android 11 cannot list file in emulated/storage/0 ?

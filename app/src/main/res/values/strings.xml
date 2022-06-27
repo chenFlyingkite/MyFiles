@@ -16,6 +16,8 @@
     <string name="share_to">分享到&#8230;</string>
     <string name="share">分享</string>
 
+    <string name="open_with">以其他開啟&#8230;</string>
+
     <string name="file_menu_select">選擇</string>
     <string name="file_menu_share">分享</string>
     <string name="file_menu_open_with">以其他開啟</string>
@@ -24,6 +26,9 @@
     <string name="file_menu_rename">重新命名</string>
     <string name="file_menu_delete">刪除</string>
     <string name="file_menu_info">檔案資訊</string>
+
+    <string name="delete_title">刪除 %s ?</string>
+    <string name="delete_title_confirm">確定刪除 %s ?</string>
 
     <!-- No translation -->
     <string name="nameAZ">nameAZ</string>

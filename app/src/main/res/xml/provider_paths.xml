@@ -24,7 +24,10 @@
         <external-media-path name="name" path="path" />
     -->
     <!--    <external-files-path name="file_data" path="data/"/>-->
-    <external-cache-path name="cache_data" path="/"/>
+<!--    <external-cache-path name="cache_data" path="/"/>-->
+
+<!--    {Environment.getExternalStorageDirectory()}-->
+    <external-path name="externalPath" path="/" />
 
     <!--
     <files-path name="share" path="external_path"/>

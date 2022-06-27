@@ -15,6 +15,6 @@
     </style>
     <style name="text_menu2" parent="text_menu">
         <item name="android:padding">@dimen/t5dp</item>
-        <item name="android:textSize">@dimen/t14sp</item>
+        <item name="android:textSize">@dimen/t18sp</item>
     </style>
 </resources>

@@ -31,7 +31,7 @@ public class FilePreference extends EasyPreference {
         return new Pair<>(id, App.me.getString(keyID));
     }
 
-    private static Loggable z = new Loggable() {
+    private static final Loggable z = new Loggable() {
     };
 
     private static int findSort(String key) {
