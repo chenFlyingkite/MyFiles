@@ -30,6 +30,14 @@
     <string name="delete_title">刪除 %s ?</string>
     <string name="delete_title_confirm">確定刪除 %s ?</string>
 
+    <string name="update">更新</string>
+    <string name="sort">排序</string>
+    <string name="dfs_folder">DFS Folder</string>
+    <string name="action_create_folder">建立新資料夾</string>
+    <string name="folder_name">資料夾名稱</string>
+    <string name="success">成功</string>
+    <string name="fail">失敗</string>
+
     <!-- No translation -->
     <string name="nameAZ">nameAZ</string>
     <string name="nameZA">nameZA</string>

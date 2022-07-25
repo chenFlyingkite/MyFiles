@@ -17,28 +17,43 @@
             <Button
                 android:id="@+id/reload"
                 style="@style/button"
-                android:text="更新"/>
+                android:text="@string/update"/>
+            <Button
+                android:id="@+id/createFolderBtn"
+                style="@style/button"
+                android:text="@string/action_create_folder"/>
+            <ImageView
+                android:id="@+id/pasteBtn"
+                android:layout_width="@dimen/t50dp"
+                android:layout_height="@dimen/t50dp"
+                android:background="@drawable/bg_item"
+                android:src="@drawable/baseline_folder_24"/>
             <Button
                 android:id="@+id/dfsSize"
                 style="@style/button"
-                android:text="DFS Size"/>
+                android:text="@string/dfs_folder"/>
             <Button
                 android:id="@+id/sortBtn"
                 style="@style/button"
-                android:text="Sort"/>
+                android:text="@string/sort"/>
         </LinearLayout>
     </HorizontalScrollView>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/folderPath"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/t40dp"
+        android:layout_below="@id/topbar"/>
     <TextView
         android:id="@+id/parentFolder"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/topbar"
+        android:layout_below="@id/folderPath"
         tools:text="parent folder"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerDisk"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:scrollbars="horizontal|vertical"
         android:scrollbarAlwaysDrawVerticalTrack="true"
         android:layout_below="@id/parentFolder"

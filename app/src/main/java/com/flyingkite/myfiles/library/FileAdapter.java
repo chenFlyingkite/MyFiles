@@ -22,6 +22,7 @@ import java.util.Map;
 import flyingkite.library.android.log.Loggable;
 import flyingkite.library.androidx.TicTac2;
 import flyingkite.library.androidx.recyclerview.RVAdapter;
+import flyingkite.library.java.data.FileInfo;
 
 public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter.ItemListener> implements Loggable {
 
@@ -44,13 +45,13 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
     private TicTac2 clock = new TicTac2();
     private final SimpleDateFormat timeYYYYMMDD = new SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.US);
 
-    private Map<File, Long> spaces = new HashMap<>();
+    private Map<File, FileInfo> spaces = new HashMap<>();
 
-    public void setSpaces(Map<File, Long> space) {
+    public void setSpaces(Map<File, FileInfo> space) {
         spaces = space;
     }
 
-    public Map<File, Long> getSpaces() {
+    public Map<File, FileInfo> getSpaces() {
         return spaces;
     }
 
@@ -69,6 +70,7 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
         clock.enable(false);
         clock.tic();
         clock.tic();
+
         File it = itemOf(position);
         clock.tac("itemOf");
         clock.tic();
@@ -89,11 +91,13 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
         clock.tac("Glide");
         long rate = 0;
         if (spaces.containsKey(it)) {
-            long me = spaces.get(it);
+            FileInfo info = spaces.get(it);
+            logE("info = %s for it = %s", info, it);
+            long me = info.fileSize;
             File par = it.getParentFile();
             long max = vh.sizeRate.getMax();
             if (me > 0 && par != null && spaces.containsKey(par)) {
-                long parMe = spaces.get(par);
+                long parMe = info.fileSize;
                 if (parMe > 0) {
                     rate = max * me / parMe;
                 } else {

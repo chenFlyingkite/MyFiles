@@ -11,39 +11,39 @@
         android:background="#d333">
         <TextView
             android:id="@+id/itemTitle"
-            style="@style/text_menu2"
+            style="@style/text_menu2.MP"
             android:text=""/>
         <TextView
             android:id="@+id/itemSelect"
-            style="@style/text_menu2"
+            style="@style/text_menu2.MP"
             android:text="@string/file_menu_select"/>
         <TextView
             android:id="@+id/itemShare"
-            style="@style/text_menu2"
+            style="@style/text_menu2.MP"
             android:text="@string/file_menu_share"/>
         <TextView
             android:id="@+id/itemOpenWith"
-            style="@style/text_menu2"
+            style="@style/text_menu2.MP"
             android:text="@string/file_menu_open_with"/>
         <TextView
             android:id="@+id/itemMoveTo"
-            style="@style/text_menu2"
+            style="@style/text_menu2.MP"
             android:text="@string/file_menu_move_to"/>
         <TextView
             android:id="@+id/itemCopyTo"
-            style="@style/text_menu2"
+            style="@style/text_menu2.MP"
             android:text="@string/file_menu_copy_to"/>
         <TextView
             android:id="@+id/itemRename"
-            style="@style/text_menu2"
+            style="@style/text_menu2.MP"
             android:text="@string/file_menu_rename"/>
         <TextView
             android:id="@+id/itemDelete"
-            style="@style/text_menu2"
+            style="@style/text_menu2.MP"
             android:text="@string/file_menu_delete"/>
         <TextView
             android:id="@+id/itemFileInfo"
-            style="@style/text_menu2"
+            style="@style/text_menu2.MP"
             android:text="@string/file_menu_info"/>
     </LinearLayout>
 </ScrollView>

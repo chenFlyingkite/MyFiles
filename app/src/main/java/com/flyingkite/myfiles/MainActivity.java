@@ -3,6 +3,7 @@ package com.flyingkite.myfiles;
 import android.Manifest;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -20,14 +21,24 @@ public class MainActivity extends BaseActivity {
 
     private TicTac2 clock = new TicTac2();
     private FrameLayout frame;
+    private View back;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        frame = findViewById(R.id.fileFragment);
+        init();
+
         reqStorage();
         replaceFileFragment();
+    }
+
+    private void init() {
+        frame = findViewById(R.id.fileFragment);
+        back = findViewById(R.id.backBtn);
+        back.setOnClickListener((v) -> {
+            onBackPressed();
+        });
     }
 
     @Override
@@ -76,10 +87,10 @@ public class MainActivity extends BaseActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        log("Request permissions = " + Arrays.toString(permissions));
+        log("and returns results = " + Arrays.toString(grantResults));
         switch (requestCode) {
             case myFileReq:
-                log("Request permissions = " + Arrays.toString(permissions));
-                log("and returns results = " + Arrays.toString(grantResults));
                 break;
         }
     }

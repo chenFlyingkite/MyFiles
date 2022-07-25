@@ -7,9 +7,24 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+    <LinearLayout
+        android:id="@+id/topBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/backBtn"
+            android:layout_width="@dimen/t50dp"
+            android:layout_height="@dimen/t50dp"
+            android:background="@color/yellow"
+            android:src="@drawable/ic_arrow_back"/>
+    </LinearLayout>
+
     <FrameLayout
         android:id="@+id/fileFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_below="@id/topBar">
     </FrameLayout>
 </RelativeLayout>

@@ -40,4 +40,7 @@
     <color name="brown1">#483119</color>
     <color name="brown2">#2E1C0D</color>
     <color name="a1">#0f0</color>
+    <color name="gray">#4ddd</color>
+    <color name="greenLight">#40f0</color>
+    <color name="blue">#400f</color>
 </resources>
