@@ -15,11 +15,13 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Pair;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.PopupWindow;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -40,9 +42,6 @@ import com.flyingkite.myfiles.media.ImagePlayer;
 import com.flyingkite.myfiles.media.VideoPlayer;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.net.URLConnection;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -51,6 +50,7 @@ import java.util.Comparator;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import flyingkite.library.android.media.MediaMetadataRetrieverUtil;
 import flyingkite.library.android.media.MimeTypeMapUtil;
@@ -70,6 +70,7 @@ public class FileFragment extends BaseFragment {
     public static final String TAG = "FileFragment";
 
     private Library<FileAdapter> diskLib;
+    private FileAdapter fileAdapter = new FileAdapter();
     private CenterScroller scroller = new CenterScroller() {
         @Override
         public RecyclerView getRecyclerView() {
@@ -93,6 +94,7 @@ public class FileFragment extends BaseFragment {
     private TextView sortBtn;
     private View createFolderBtn;
     private ImageView pasteBtn;
+    private View deleteBtn;
 
     private int moveTo;
     private File moveSrcFile;
@@ -277,16 +279,22 @@ public class FileFragment extends BaseFragment {
                 Toast.makeText(getContext(), "ok = " + ok, Toast.LENGTH_SHORT).show();
             } else if (moveTo == 2) {
                 // copy
-                List<File> dfs = listSub(moveSrcFile);
+                List<File> dfs = FileUtil.listAllFiles(moveSrcFile);
                 logE("dfs get %s items", dfs.size());
                 for (int i = 0; i < dfs.size(); i++) {
                     logE("#%s : %s", i, dfs.get(i));
                 }
+                // this is test
+//                List<File> bfs = FileUtil.listAllFilesBFS(moveSrcFile);
+//                logE("bfs get %s items", bfs.size());
+//                for (int i = 0; i < bfs.size(); i++) {
+//                    logE("#%s : %s", i, bfs.get(i));
+//                }
                 for (int i = 0; i < dfs.size(); i++) {
                     File next = dfs.get(i);
                     String newPath = next.getAbsolutePath().replaceFirst(path, dst.getAbsolutePath());
                     File newItem = new File(newPath);
-                    copy(newItem, next);
+                    FileUtil.copy(newItem, next);
                     logE("new as exist = %s, %s", newItem.exists(), newItem);
                 }
 
@@ -297,6 +305,18 @@ public class FileFragment extends BaseFragment {
             updateMove();
             reloadMe();
         });
+        deleteBtn = findViewById(R.id.deleteBtn);
+        deleteBtn.setOnClickListener((v) -> {
+            Set<Integer> choose = fileAdapter.getSelectedIndex();
+            for (int x : choose) {
+                File dst = fileAdapter.itemOf(x);
+                FileUtil.ensureDelete(dst);
+            }
+            clearSelection();
+            reloadMe();
+        });
+
+        updateDelete();
         updateMove();
 
         parentFolder = findViewById(R.id.parentFolder);
@@ -304,37 +324,16 @@ public class FileFragment extends BaseFragment {
         initPathLib();
     }
 
-    private void copy(File dst, File src) {
-        if (FileUtil.isGone(src)) return;
-
-        if (src.isDirectory() && dst.isDirectory()) {
-            dst.mkdirs();
-        } else {
-            FileUtil.createNewFile(dst);
-            try {
-                FileUtil.copy(new FileInputStream(src), new FileOutputStream(dst));
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-        }
+    private void clearSelection() {
+        fileAdapter.getSelectedIndex().clear();
+        fileAdapter.notifyDataSetChanged();
+        updateDelete();
     }
 
-    private List<File> listSub(File root) {
-        List<File> ans = new ArrayList<>();
-        if (root == null) return ans;
-        ans.add(root);
-        if (root.isDirectory()) {
-            File[] fs = root.listFiles();
-            if (fs != null) {
-                List<File> sub;
-                for (int i = 0; i < fs.length; i++) {
-                    sub = listSub(fs[i]);
-                    ans.addAll(sub);
-                }
-            }
-        }
-        return ans;
+    private void updateDelete() {
+        deleteBtn.setEnabled(fileAdapter.isInSelectionMode());
     }
+
 
     private void updateMove() {
         final int[] src = {R.drawable.baseline_folder_24, R.drawable.baseline_file_open_24, R.drawable.baseline_folder_copy_24};
@@ -354,18 +353,8 @@ public class FileFragment extends BaseFragment {
                 fileList(item);
             }
         });
-        updatePathLib();
     }
 
-    private void updatePathLib() {
-        String main = parentNowAt.getAbsolutePath();
-//        List<String> split = itemTo(parentDeepAt, parentNowAt);
-//        logE("main = %s", main);
-//        logE("deep = %s", deep);
-//        logE("split = %s", split);
-//        pathItemAdapter.setDataList(split);
-//        pathItemAdapter.notifyDataSetChanged();
-    }
 
     private List<String> buildItems(File src, File root) {
         List<String> ans = new ArrayList<>();
@@ -386,10 +375,15 @@ public class FileFragment extends BaseFragment {
         diskLib = new Library<>(findViewById(R.id.recyclerDisk), true);
 
         List<File> ans = new ArrayList<>();
-        FileAdapter ta = new FileAdapter();
-        ta.setItemListener(new FileAdapter.ItemListener() {
+        fileAdapter.setItemListener(new FileAdapter.ItemListener() {
             @Override
             public void onClick(File item, FileAdapter.FileVH holder, int position) {
+                if (fileAdapter.isInSelectionMode()) {
+                    fileAdapter.toggleSelect(position);
+                    updateDelete();
+                    return;
+                }
+
 //                if (parentNowAt.equals(item.getParentFile())) {
                     // next folder
                     //pathItems.set(pathItems.size() - 1, item.getAbsolutePath());
@@ -431,31 +425,38 @@ public class FileFragment extends BaseFragment {
                     } else {
                         openImage(item);
                     }
-//                    openImage(item);
-//                    openVideo(item);
                 }
-                updatePathLib();
             }
 
             @Override
             public boolean onLongClick(File item, FileAdapter.FileVH holder, int position) {
+                if (!fileAdapter.isInSelectionMode()) {
+                    fileAdapter.addSelect(position);
+                    updateDelete();
+                }
+                return true;
+            }
 
+            private void clearAppCache() {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                     Activity a = getActivity();
                     Intent it = new Intent(StorageManager.ACTION_CLEAR_APP_CACHE);
                     a.startActivityForResult(it, ASD);
                 }
-                return true;
             }
 
             @Override
             public void onAction(File item, FileAdapter.FileVH vh, int position) {
                 // TODO
                 logE("show drop down %s", item);
-                Pair<View, PopupWindow> pair = createPopupWindow(R.layout.popup_file_menu, getView());
-                initActions(pair, item);
-                pair.second.showAsDropDown(vh.action);
-                //pair.second.showAsDropDown(vh.itemView); // still out of bound
+                boolean window = false;
+                if (window) {
+                    showPopupWindow(vh.action, item); // this will make window out of bound
+                    //pair.second.showAsDropDown(vh.itemView); // still out of bound
+                } else {
+                    showSortMenu(vh.action, item);
+                }
+
                 // For folders :
                 // select
                 // move to
@@ -478,8 +479,14 @@ public class FileFragment extends BaseFragment {
                 // info
             }
         });
-        ta.setDataList(ans);
-        diskLib.setViewAdapter(ta);
+        fileAdapter.setDataList(ans);
+        diskLib.setViewAdapter(fileAdapter);
+    }
+
+    private void showPopupWindow(View anchor, File item) {
+        Pair<View, PopupWindow> pair = createPopupWindow(R.layout.popup_file_menu, getView());
+        initActions(pair, item);
+        pair.second.showAsDropDown(anchor);
     }
 
     private void initActions(Pair<View, PopupWindow> pair, File item) {
@@ -544,10 +551,6 @@ public class FileFragment extends BaseFragment {
             new DialogUtil.Alert(a, R.layout.dialog_message, 0, new DialogUtil.InflateListener() {
                 @Override
                 public void onFinishInflate(View view, AlertDialog dialog) {
-//                    init(view, dialog);
-//                }
-//
-//                private void init(View view, AlertDialog dialog) {
                     TextView t;
                     t = view.findViewById(R.id.itemTitle);
                     t.setText(getString(R.string.delete_title, item.getName()));
@@ -602,6 +605,118 @@ public class FileFragment extends BaseFragment {
                 }
             }).buildAndShow();
         });
+    }
+
+    private PopupMenu pmenu;
+
+    private void showSortMenu(View anchor, File item) {
+        PopupMenu m = new PopupMenu(getContext(), anchor);
+        pmenu = m;
+        m.inflate(R.menu.view_menu);
+        MenuItem it = pmenu.getMenu().findItem(R.id.itemTitle);
+        it.setTitle(item.getAbsolutePath());
+        m.setOnMenuItemClickListener((menu) -> {
+            Activity a = getActivity();
+            if (a == null) {
+                return false;
+            }
+            int id = menu.getItemId();
+
+            if (id == R.id.itemShare) {
+                share(item);
+            } else if (id == R.id.itemOpenWith) {
+                openWith(item);
+            } else if (id == R.id.itemMoveTo) {
+                moveSrcFile = item;
+                moveTo = 1;
+                updateMove();
+            } else if (id == R.id.itemCopyTo) {
+                moveSrcFile = item;
+                moveTo = 2;
+                updateMove();
+            } else if (id == R.id.itemRename) {
+                new DialogUtil.Alert(a, R.layout.dialog_rename, 0, new DialogUtil.InflateListener() {
+                    @Override
+                    public void onFinishInflate(View view, AlertDialog dialog) {
+                        EditText edit = view.findViewById(R.id.itemInput);
+                        edit.setText(item.getName());
+
+                        view.findViewById(R.id.itemCancel).setOnClickListener((vv) -> {
+                            dialog.dismiss();
+                        });
+                        view.findViewById(R.id.itemOK).setOnClickListener((vv) -> {
+                            File next = new File(item.getParent(), edit.getText().toString());
+                            boolean ok = item.renameTo(next);
+                            logE("rename ok = %s", ok);
+                            logE("old = %s\nnew = %s", item, next);
+                            dialog.dismiss();
+                            reloadMe();
+                        });
+                    }
+                }).buildAndShow();
+            } else if (id == R.id.itemDelete) {
+                new DialogUtil.Alert(a, R.layout.dialog_message, 0, new DialogUtil.InflateListener() {
+                    @Override
+                    public void onFinishInflate(View view, AlertDialog dialog) {
+                        TextView t;
+                        t = view.findViewById(R.id.itemTitle);
+                        t.setText(getString(R.string.delete_title, item.getName()));
+                        t = view.findViewById(R.id.itemMessage);
+                        t.setText(getString(R.string.delete_title_confirm, item.getAbsolutePath()));
+
+                        view.findViewById(R.id.itemOK).setOnClickListener((v) -> {
+                            boolean ok = FileUtil.ensureDelete(item);
+                            logE("ok = %s, for %s", ok, item);
+                            reloadMe();
+                            dialog.dismiss();
+                        });
+                        view.findViewById(R.id.itemCancel).setOnClickListener((v) -> {
+                            dialog.dismiss();
+                        });
+                    }
+                }).buildAndShow();
+            } else if (id == R.id.itemFileInfo) {
+                new DialogUtil.Alert(a, R.layout.dialog_message, 0, new DialogUtil.InflateListener() {
+                    @Override
+                    public void onFinishInflate(View view, AlertDialog dialog) {
+                        TextView t = null;
+                        t = view.findViewById(R.id.itemTitle);
+                        t.setText(item.getAbsolutePath());
+                        StoreFiles sf = new StoreFiles(a);
+                        MediaRequest r = sf.newRequest();
+                        r.listener = new DataListener<Map<String, String>>() {
+
+                            @Override
+                            public void onError(Exception error) {
+                                logE("error = %s", error);
+                            }
+
+                            @Override
+                            public void onComplete(List<Map<String, String>> all) {
+                                logE("all %s, %s, %s", all.size(), all.get(0).size(), all.get(0).keySet());
+                                logE("all %s", all);
+                                ThreadUtil.runOnUiThread(() -> {
+                                    String m = all.toString();
+                                    TextView t = view.findViewById(R.id.itemMessage);
+                                    t.setText(m);
+                                });
+                            }
+                        };
+                        sf.queryItem(item.getAbsolutePath(), r);
+                    }
+                }).buildAndShow();
+            } else if (id == R.id.itemOpenWith) {
+                openWith(item);
+            } else if (id == R.id.itemOpenWith) {
+                openWith(item);
+            } else if (id == R.id.itemOpenWith) {
+                openWith(item);
+            } else {
+                return super.onOptionsItemSelected(menu);
+            }
+            return true;
+        });
+        pmenu.show();
     }
 
     private void showSortMenu(View anchor) {
@@ -741,10 +856,15 @@ public class FileFragment extends BaseFragment {
         }
         logE("parent = %s", parentNowAt);
 
+        // leave select mode
+        if (fileAdapter.isInSelectionMode()) {
+            clearSelection();
+            return true;
+        }
+
+        // Back to parent folder
         if (parentNowAt != null) {
             File p = parentNowAt.getParentFile();
-            //pathItemAdapter.moveNowAt(-1);
-            //pathItemAdapter.setNowAt(pathItemAdapter.getNowAt() - 1);
             pathItemAdapter.moveTo(p);
             if (p != null) {
                 fileList(p);
@@ -756,7 +876,6 @@ public class FileFragment extends BaseFragment {
                         //scroller.scrollToPercent(pp.x, 0, 30, false);
                     }, 3000);
                 }
-                updatePathLib();
                 return true;
             }
         }

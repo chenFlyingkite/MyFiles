@@ -12,13 +12,28 @@
         android:padding="2dp"
         android:src="@mipmap/ic_launcher" />
 
-    <ImageView
-        android:id="@+id/itemAction"
+    <RelativeLayout
+        android:id="@+id/itemActions"
         android:layout_width="@dimen/t40dp"
         android:layout_height="@dimen/t40dp"
         android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"
-        android:src="@mipmap/ic_launcher_round"/>
+        android:layout_centerVertical="true">
+
+        <ImageView
+            android:id="@+id/itemAction"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerInParent="true"
+            android:src="@drawable/more_vert"/>
+
+        <CheckBox
+            android:id="@+id/itemSelected"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerInParent="true"
+            android:visibility="gone"
+            tools:visibility="visible"/>
+    </RelativeLayout>
 
     <RelativeLayout
         android:id="@+id/sizePart"
@@ -27,7 +42,7 @@
         android:layout_toRightOf="@id/itemThumb"
         android:layout_alignTop="@id/itemThumb"
         android:layout_alignBottom="@id/itemThumb"
-        android:layout_toLeftOf="@id/itemAction"
+        android:layout_toLeftOf="@id/itemActions"
         android:paddingHorizontal="@dimen/t10dp">
         <ProgressBar
             android:id="@+id/itemSizeRate"
@@ -45,7 +60,6 @@
             android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"
             tools:text="3 Bytes"/>
-
     </RelativeLayout>
 
     <View
@@ -73,8 +87,6 @@
         android:layout_height="wrap_content"
         android:layout_toRightOf="@id/itemV1"
         android:layout_below="@id/itemTitle"
-        tools:text="information"
-        />
-
+        tools:text="information" />
 
 </RelativeLayout>

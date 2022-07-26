@@ -36,6 +36,10 @@
                 android:id="@+id/sortBtn"
                 style="@style/button"
                 android:text="@string/sort"/>
+            <Button
+                android:id="@+id/deleteBtn"
+                style="@style/button"
+                android:text="@string/file_menu_delete"/>
         </LinearLayout>
     </HorizontalScrollView>
     <androidx.recyclerview.widget.RecyclerView

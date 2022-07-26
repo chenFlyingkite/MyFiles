@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/itemTitle"
+        android:title=""/>
+    <item
+        android:id="@+id/itemSelect"
+        android:title="@string/file_menu_select"/>
+    <item
+        android:id="@+id/itemShare"
+        android:title="@string/file_menu_share"/>
+    <item
+        android:id="@+id/itemOpenWith"
+        android:title="@string/file_menu_open_with"/>
+    <item
+        android:id="@+id/itemMoveTo"
+        android:title="@string/file_menu_move_to"/>
+    <item
+        android:id="@+id/itemCopyTo"
+        android:title="@string/file_menu_copy_to"/>
+    <item
+        android:id="@+id/itemRename"
+        android:title="@string/file_menu_rename"/>
+    <item
+        android:id="@+id/itemDelete"
+        android:title="@string/file_menu_delete"/>
+    <item
+        android:id="@+id/itemFileInfo"
+        android:title="@string/file_menu_info"/>
+
+</menu>

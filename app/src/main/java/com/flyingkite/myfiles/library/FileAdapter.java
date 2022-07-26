@@ -3,6 +3,7 @@ package com.flyingkite.myfiles.library;
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -16,13 +17,16 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import flyingkite.library.android.log.Loggable;
 import flyingkite.library.androidx.TicTac2;
 import flyingkite.library.androidx.recyclerview.RVAdapter;
 import flyingkite.library.java.data.FileInfo;
+import flyingkite.library.java.util.FileUtil;
 
 public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter.ItemListener> implements Loggable {
 
@@ -45,6 +49,8 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
     private TicTac2 clock = new TicTac2();
     private final SimpleDateFormat timeYYYYMMDD = new SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.US);
 
+    private final Set<Integer> selectedIndex = new HashSet<>();
+
     private Map<File, FileInfo> spaces = new HashMap<>();
 
     public void setSpaces(Map<File, FileInfo> space) {
@@ -53,6 +59,42 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
 
     public Map<File, FileInfo> getSpaces() {
         return spaces;
+    }
+
+
+    public boolean isInSelectionMode() {
+        return selectedIndex.size() > 0;
+    }
+
+    public Set<Integer> getSelectedIndex() {
+        return selectedIndex;
+    }
+
+    public void addSelect(int index) {
+        boolean notifyAll = selectedIndex.isEmpty();
+        boolean ok = selectedIndex.add(index);
+        if (notifyAll) {
+            notifyDataSetChanged();
+        } else if (ok) {
+            notifyItemChanged(index);
+        }
+    }
+
+    public void removeSelect(int index) {
+        boolean ok = selectedIndex.remove(index);
+        if (selectedIndex.isEmpty()) {
+            notifyDataSetChanged();
+        } else if (ok) {
+            notifyItemChanged(index);
+        }
+    }
+
+    public void toggleSelect(int index) {
+        if (selectedIndex.contains(index)) {
+            removeSelect(index);
+        } else {
+            addSelect(index);
+        }
     }
 
     @NonNull
@@ -86,7 +128,7 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
         if (it.isFile()) {
             Glide.with(vh.thumb).load(it).placeholder(R.mipmap.ic_launcher_round).into(vh.thumb);
         } else {
-            vh.thumb.setImageResource(R.mipmap.ic_launcher_round);
+            vh.thumb.setImageResource(R.drawable.baseline_folder_24);
         }
         clock.tac("Glide");
         long rate = 0;
@@ -104,7 +146,7 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
                     rate = max;
                 }
             }
-            vh.sizeB.setText(rate + "%% " + toGbMbKbB(me));
+            vh.sizeB.setText(rate + "%% " + FileUtil.toGbMbKbB(me));
         } else {
             vh.sizeB.setText("");
         }
@@ -116,11 +158,14 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
             }
             return false;
         });
+        vh.action.setVisibility(isInSelectionMode() ? View.GONE : View.VISIBLE);
         vh.action.setOnClickListener((v) -> {
             if (onItem != null) {
                 onItem.onAction(it, vh, position);
             }
         });
+        vh.selected.setVisibility(isInSelectionMode() ? View.VISIBLE : View.GONE);
+        vh.selected.setChecked(selectedIndex.contains(position));
     }
 
     private String info(File f, int at) {
@@ -141,47 +186,11 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
             clock.tac("list %s", si);
         } else {
             long size = f.length();
-            si += toGbMbKbB(size);
+            si += FileUtil.toGbMbKbB(size);
             clock.tac("size %s", si);
         }
 
         return _fmt("#%d : %s, %s", at, time, si);
-    }
-
-    // TODO FIX MyAndroid
-    public String toGbMbKbB(long size) {
-        return toGbMbKbB(size, new boolean[]{true, true, true});
-    }
-
-    public String toGbMbKbB(long size, boolean[] gbMbKb) {
-        //      GB, MB, KB, B
-        long[] mod = {0, 0, 0, 0};
-        long now = size;
-        for (int i = mod.length - 1; i >= 0; i--) {
-            mod[i] = now % 1024;
-            now /= 1024;
-        }
-        long b = mod[3];
-        long kb = mod[2];
-        long mb = mod[1];
-        long gb = mod[0];
-        long x = b + 1024 * (kb + 1024 * (mb + 1024*(gb)));
-        if (x != size) {
-            logE("X_X size = %s, x = %s, [%s, %s, %s, %s]", size, x, gb, mb, kb, b);
-        }
-
-        if (gb > 0 && gbMbKb[0]) {
-            double val = gb + mb / 1024.0;
-            return String.format(Locale.US, "%.2f GB", val);
-        } else if (mb > 0 && gbMbKb[1]) {
-            double val = mb + kb / 1024.0;
-            return String.format(Locale.US, "%.2f MB", val);
-        } else if (kb > 0 && gbMbKb[2]) {
-            double val = kb + b / 1024.0;
-            return String.format(Locale.US, "%.2f KB", val);
-        } else {
-            return String.format(Locale.US, "%3d Bytes", b);
-        }
     }
 
     public static class FileVH extends RecyclerView.ViewHolder {
@@ -191,6 +200,7 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
         public TextView sizeB;
         public ImageView thumb;
         public View action;
+        public CheckBox selected;
         public ProgressBar sizeRate;
 
         public FileVH(@NonNull View v) {
@@ -201,6 +211,7 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
             thumb = v.findViewById(R.id.itemThumb);
             action = v.findViewById(R.id.itemAction);
             sizeRate = v.findViewById(R.id.itemSizeRate);
+            selected = v.findViewById(R.id.itemSelected);
         }
     }
 }

@@ -10,6 +10,7 @@ import java.util.Map;
 
 import flyingkite.library.android.log.Loggable;
 import flyingkite.library.android.preference.EasyPreference;
+import flyingkite.library.java.data.FileInfo;
 
 public class FilePreference extends EasyPreference {
     public FilePreference() {
@@ -49,7 +50,7 @@ public class FilePreference extends EasyPreference {
         return App.me.getString(fileSortBy.get(at).first);
     }
 
-    public static Comparator<File> getComparatorFileList(Map<File, ?> info) {
+    public static Comparator<File> getComparatorFileList(Map<File, FileInfo> info) {
         FilePreference pref = new FilePreference();
         String key = pref.fileSort.get();
         int k = findSort(key);
@@ -57,6 +58,12 @@ public class FilePreference extends EasyPreference {
         if (sort == R.string.fileList_Date_old_to_new || sort == R.string.fileList_Date_new_to_old) {
             return new Comparator<>() {
                 private long base(File f) {
+                    if (info != null) {
+                        FileInfo fi = info.get(f);
+                        if (fi != null) {
+                            return fi.lastModified;
+                        }
+                    }
                     return f == null ? 0 : f.lastModified();
                 }
                 @Override
@@ -78,9 +85,9 @@ public class FilePreference extends EasyPreference {
                 private long base(File f) {
                     // get from info if it is Map<File, Long>
                     if (info != null) {
-                        Object o = info.get(f);
-                        if (o instanceof Long) {
-                            return (long) o;
+                        FileInfo fi = info.get(f);
+                        if (fi != null) {
+                            return fi.fileSize;
                         }
                     }
                     return f == null ? 0 : f.length();
