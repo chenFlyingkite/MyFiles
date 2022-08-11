@@ -19,6 +19,14 @@
             android:layout_height="@dimen/t50dp"
             android:background="@color/yellow"
             android:src="@drawable/ic_arrow_back"/>
+        <ImageView
+            android:id="@+id/usageStats"
+            android:layout_width="@dimen/t50dp"
+            android:layout_height="@dimen/t50dp"
+            android:background="@color/yellow"
+            android:rotation="90"
+            android:src="@drawable/ic_arrow_back"/>
+
     </LinearLayout>
 
     <FrameLayout

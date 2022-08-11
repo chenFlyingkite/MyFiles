@@ -10,9 +10,11 @@ import androidx.multidex.MultiDexApplication;
 import java.io.File;
 
 import flyingkite.library.android.log.Loggable;
+import flyingkite.library.android.util.PackageManagerUtil;
 
 public class App extends MultiDexApplication implements Loggable {
     public static App me;
+    private static PackageManagerUtil packageManager;
 
     @Override
     protected void attachBaseContext(Context base) {
@@ -50,6 +52,25 @@ public class App extends MultiDexApplication implements Loggable {
                     .penaltyLog()
                     .build());
         }
+    }
+
+    @Override
+    public void onTrimMemory(int level) {
+        super.onTrimMemory(level);
+        logE("onTrimMemory(%s)", level);
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        logE("onLowMemory");
+    }
+
+    // emulator
+    @Override
+    public void onTerminate() {
+        super.onTerminate();
+        logE("onTerminate");
     }
 
     public static String getFileProviderAuthority(Context c) {

@@ -1,8 +1,17 @@
 package com.flyingkite.myfiles;
 
 import android.Manifest;
+import android.app.usage.UsageStats;
+import android.app.usage.UsageStatsManager;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.View;
 import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
@@ -12,16 +21,22 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.flyingkite.myfiles.library.FileFragment;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 
 import flyingkite.library.android.util.BackPage;
 import flyingkite.library.androidx.TicTac2;
 
 public class MainActivity extends BaseActivity {
 
+    private static final SimpleDateFormat dateFmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US);
     private TicTac2 clock = new TicTac2();
     private FrameLayout frame;
     private View back;
+    private View usages;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +54,80 @@ public class MainActivity extends BaseActivity {
         back.setOnClickListener((v) -> {
             onBackPressed();
         });
+        usages = findViewById(R.id.usageStats);
+        usages.setOnClickListener((v) -> {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return;
+
+            UsageStatsManager umgr = (UsageStatsManager) getSystemService(Context.USAGE_STATS_SERVICE);
+            long time = System.currentTimeMillis();
+            List<UsageStats> stats = umgr.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, time - 1000 * 10, time);
+            logE("stats = %s", stats);
+            if (stats == null || stats.isEmpty()) {
+                // Usage access is not enabled
+                startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
+            } else {
+                logE("%s stats", stats.size());
+
+                for (int i = 0; i < stats.size(); i++) {
+                    UsageStats it = stats.get(i);
+                    String s = _fmt("%s\n1stTime = %s, lastTime = %s, used = %s", it.getPackageName()
+                            , dateFmt.format(new Date(it.getFirstTimeStamp()))
+                            , dateFmt.format(new Date(it.getLastTimeStamp()))
+                            , dateFmt.format(new Date(it.getLastTimeUsed()))
+                    );
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        s += _fmt(", lasVis = %s, lastFsu = %s, allFsu = %s, allTF = %s, allTV = %s"
+                                , dateFmt.format(new Date(it.getLastTimeVisible()))
+                                , dateFmt.format(new Date(it.getLastTimeForegroundServiceUsed()))
+                                , dateFmt.format(new Date(it.getTotalTimeForegroundServiceUsed()))
+                                , dateFmt.format(new Date(it.getTotalTimeInForeground()))
+                                , dateFmt.format(new Date(it.getTotalTimeVisible()))
+                        );
+                    }
+
+                    logE("#%s : %s", i, s);
+                }
+            }
+            listApps();
+            listApps2();
+        });
+        //usages.callOnClick();
+    }
+
+
+    private void listApps() {
+        PackageManager pm = getPackageManager();
+        if (pm != null) {
+            //pm.getApplicationIcon("name");
+            List<ApplicationInfo> li = pm.getInstalledApplications(PackageManager.GET_META_DATA);
+            logE("%s ApplicationInfo", li.size());
+            for (int i = 0; i < li.size(); i++) {
+                ApplicationInfo ai = li.get(i);
+                logE("#%s : %s, %s, targetSdk = %s", i, ai.className, ai.enabled, ai.targetSdkVersion);
+            }
+            List<PackageInfo> pi = pm.getInstalledPackages(0);
+            logE("%s PackageInfo", pi.size());
+            for (int i = 0; i < pi.size(); i++) {
+                PackageInfo ai = pi.get(i);
+                logE("#%s : %s, update = %s, install= %s, reqPer = %s", i, ai.packageName
+                        , dateFmt.format(new Date(ai.lastUpdateTime))
+                        , dateFmt.format(new Date(ai.firstInstallTime))
+                        , Arrays.toString(ai.requestedPermissions)
+                );
+            }
+        }
+    }
+
+    private void listApps2() {
+        PackageManager pm = getPackageManager();
+        Intent mi = new Intent(Intent.ACTION_MAIN, null);
+        mi.addCategory(Intent.CATEGORY_LAUNCHER);
+        List<ResolveInfo> li = pm.queryIntentActivities(mi, 0);
+        logE("%s ResolveInfo", li.size());
+        for (int i = 0; i < li.size(); i++) {
+            ResolveInfo ri = li.get(i);
+            logE("#%s : %s", i, ri);
+        }
     }
 
     @Override
@@ -65,7 +154,7 @@ public class MainActivity extends BaseActivity {
         FragmentTransaction fx = fm.beginTransaction();
         fx.replace(R.id.fileFragment, f, FileFragment.TAG);
         fx.commitAllowingStateLoss();
-        fm.executePendingTransactions();
+        //fm.executePendingTransactions();
     }
 
     private static final int myFileReq = 123;
@@ -96,8 +185,9 @@ public class MainActivity extends BaseActivity {
     }
 
     private void reqStorage() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { // M = 23
-            requestPermissions(neededPermissions(), myFileReq);
-        }
+        // M = 23
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return;
+
+        requestPermissions(neededPermissions(), myFileReq);
     }
 }

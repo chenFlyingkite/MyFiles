@@ -15,10 +15,11 @@ import androidx.fragment.app.FragmentTransaction;
 import com.flyingkite.myfiles.FragmentUtil;
 
 import flyingkite.library.android.log.Loggable;
+import flyingkite.library.android.util.ActivityUtil;
 import flyingkite.library.android.util.BackPage;
 import flyingkite.library.android.util.ToastUtil;
 
-public class BaseFragment extends Fragment implements Loggable, BackPage, ToastUtil, FragmentUtil {
+public class BaseFragment extends Fragment implements Loggable, BackPage, ToastUtil, FragmentUtil, ActivityUtil {
 
     @Override
     public void onAttach(Context context) {

@@ -1,6 +1,7 @@
 package com.flyingkite.myfiles.library;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
@@ -23,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 
 import flyingkite.library.android.log.Loggable;
+import flyingkite.library.android.util.PackageManagerUtil;
 import flyingkite.library.androidx.TicTac2;
 import flyingkite.library.androidx.recyclerview.RVAdapter;
 import flyingkite.library.java.data.FileInfo;
@@ -46,6 +48,7 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
     private int[] colors = {0x44888888, 0x44cc0000, 0x4400cc00, 0x440000cc,
             0x44cccc00, 0x4400cccc, 0x44cc00cc};
     private Context context;
+    private PackageManagerUtil packageManager;
     private TicTac2 clock = new TicTac2();
     private final SimpleDateFormat timeYYYYMMDD = new SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.US);
 
@@ -102,6 +105,7 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
     public FileVH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         if (context == null) {
             context = parent.getContext();
+            packageManager = new PackageManagerUtil(context);
         }
         return new FileVH(inflateView(parent, R.layout.view_file_row));
     }
@@ -114,6 +118,7 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
         clock.tic();
 
         File it = itemOf(position);
+        String path = it.getAbsolutePath();
         clock.tac("itemOf");
         clock.tic();
         vh.name.setText(it.getName());
@@ -126,12 +131,19 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
         clock.tac("back");
         clock.tic();
         if (it.isFile()) {
-            Glide.with(vh.thumb).load(it).placeholder(R.mipmap.ic_launcher_round).into(vh.thumb);
+            if (FileUtil.isAPK(it)) {
+                Drawable icon = packageManager.getPackageIcon(path);
+                //CharSequence appName = packageManager.getPackageLabel(path);
+                Glide.with(vh.thumb).load(it).placeholder(icon).into(vh.thumb);
+            } else {
+                Glide.with(vh.thumb).load(it).placeholder(R.mipmap.ic_launcher_round).into(vh.thumb);
+            }
         } else {
             vh.thumb.setImageResource(R.drawable.baseline_folder_24);
         }
         clock.tac("Glide");
         long rate = 0;
+
         if (spaces.containsKey(it)) {
             FileInfo info = spaces.get(it);
             logE("info = %s for it = %s", info, it);
@@ -139,7 +151,8 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
             File par = it.getParentFile();
             long max = vh.sizeRate.getMax();
             if (me > 0 && par != null && spaces.containsKey(par)) {
-                long parMe = info.fileSize;
+                FileInfo parFI = spaces.get(par);
+                long parMe = parFI.fileSize;
                 if (parMe > 0) {
                     rate = max * me / parMe;
                 } else {

@@ -106,6 +106,7 @@ public class FileFragment extends BaseFragment {
     private boolean unstableScroll = false;
     private Deque<Point> savedPos = new ArrayDeque<>();
     private final int ASD = 123456;
+    private static final int REQ_INSTALL_APP = 456;
 
     @Override
     public void onAttach(Context context) {
@@ -206,7 +207,7 @@ public class FileFragment extends BaseFragment {
         dfsFile.setOnClickListener((v) -> {
             Map<File, FileInfo> spaces = getFileSizes(parentNowAt);
             diskLib.adapter.setSpaces(spaces);
-            diskLib.adapter.notifyDataSetChanged();
+            reloadMe();
         });
         sortBtn = findViewById(R.id.sortBtn);
         sortBtn.setOnClickListener((v) -> {
@@ -271,7 +272,7 @@ public class FileFragment extends BaseFragment {
             if (moveSrcFile == null) return;
             String name = moveSrcFile.getName();
             String path = moveSrcFile.getAbsolutePath();
-            File dst = new File(parentNowAt, name);
+            File dst = FileUtil.getUnconflictFile(parentNowAt, moveSrcFile);
             logE("name = %s, dst = %s", name, dst);
             if (moveTo == 1) {
                 // move
@@ -406,8 +407,9 @@ public class FileFragment extends BaseFragment {
                 String path = item.getAbsolutePath();
                 logE("Disk #%s, %s", position, item);
                 savedPosPush(makePoint());
-                fileList(item);
-                if (item.isFile()) {
+                if (item.isDirectory()) {
+                    fileList(item);
+                } else {
                     // not support for image
                     long duration = MediaMetadataRetrieverUtil.extractMetadataFromFilepath(item.getAbsolutePath(), MediaMetadataRetriever.METADATA_KEY_DURATION, -1L);
                     logE("Duration = %s", duration);
@@ -415,6 +417,7 @@ public class FileFragment extends BaseFragment {
                     boolean isV = MimeTypeMapUtil.isPrefixOfWithMimeTypeFromExtension("video/", path);
                     boolean isI = MimeTypeMapUtil.isPrefixOfWithMimeTypeFromExtension("image/", path);
                     boolean isA = MimeTypeMapUtil.isPrefixOfWithMimeTypeFromExtension("audio/", path);
+                    boolean isAPK = FileUtil.isAPK(item);
                     logE("v, i, a = %s, %s, %s", isV, isI, isA);
                     if (isI) {
                         openImage(item);
@@ -422,6 +425,8 @@ public class FileFragment extends BaseFragment {
                         openVideo(item);
                     } else if (isA) {
                         openVideo(item);
+                    } else if (isAPK) {
+                        installApp(App.getUriForFile(item), REQ_INSTALL_APP);
                     } else {
                         openImage(item);
                     }
