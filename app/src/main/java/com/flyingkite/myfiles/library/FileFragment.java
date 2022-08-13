@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.graphics.Point;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.storage.StorageManager;
@@ -105,7 +104,6 @@ public class FileFragment extends BaseFragment {
     private Pair<View, PopupWindow> sortMenu;
     private boolean unstableScroll = false;
     private Deque<Point> savedPos = new ArrayDeque<>();
-    private final int ASD = 123456;
     private static final int REQ_INSTALL_APP = 456;
 
     @Override
@@ -272,7 +270,7 @@ public class FileFragment extends BaseFragment {
             if (moveSrcFile == null) return;
             String name = moveSrcFile.getName();
             String path = moveSrcFile.getAbsolutePath();
-            File dst = FileUtil.getUnconflictFile(parentNowAt, moveSrcFile);
+            File dst = FileUtil.getUnconflictFile(parentNowAt, name);
             logE("name = %s, dst = %s", name, dst);
             if (moveTo == 1) {
                 // move
@@ -299,7 +297,7 @@ public class FileFragment extends BaseFragment {
                     logE("new as exist = %s, %s", newItem.exists(), newItem);
                 }
 
-                Toast.makeText(getContext(), "ok = ", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "copy ok", Toast.LENGTH_SHORT).show();
             }
             moveSrcFile = null;
             moveTo = 0;
@@ -349,7 +347,6 @@ public class FileFragment extends BaseFragment {
         pathItemAdapter.setItemListener(new PathItemAdapter.ItemListener() {
             @Override
             public void onClick(File item, PathItemAdapter.PathVH holder, int position) {
-                //pathItemAdapter.setNowAt(position);
                 pathItemAdapter.moveTo(item);
                 fileList(item);
             }
@@ -385,23 +382,6 @@ public class FileFragment extends BaseFragment {
                     return;
                 }
 
-//                if (parentNowAt.equals(item.getParentFile())) {
-                    // next folder
-                    //pathItems.set(pathItems.size() - 1, item.getAbsolutePath());
-//                    pathItemAdapter.notifyItemChanged(pathItems.size() - 1);
-//                    pathItems.remove(pathItems.size() - 1); // pop
-//                    if (pathItemAdapter.getNowAt() == pathItems.size() - 1) {
-//                        pathItems.add(item); // push
-//                        int end = pathItems.size() - 1;
-//                        pathItemAdapter.notifyItemInserted(end);
-//                        pathItemAdapter.setNowAt(end);
-//                    } else {
-//                        pathItems = buildItems(item, Environment.getExternalStorageDirectory());
-//                        pathItemAdapter.setDataList(pathItems);
-//                        pathItemAdapter.notifyDataSetChanged();
-//                    }
-//                } else {
-//                }
                 pathItemAdapter.moveTo(item);
 
                 String path = item.getAbsolutePath();
@@ -440,14 +420,6 @@ public class FileFragment extends BaseFragment {
                     updateDelete();
                 }
                 return true;
-            }
-
-            private void clearAppCache() {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    Activity a = getActivity();
-                    Intent it = new Intent(StorageManager.ACTION_CLEAR_APP_CACHE);
-                    a.startActivityForResult(it, ASD);
-                }
             }
 
             @Override

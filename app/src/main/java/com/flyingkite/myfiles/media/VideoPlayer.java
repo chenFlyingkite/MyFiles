@@ -208,7 +208,7 @@ public class VideoPlayer extends BaseFragment {
     @Override
     public boolean onBackPressed() {
         removeFromParent(this);
-        return false;
+        return true;
     }
 
     @Override

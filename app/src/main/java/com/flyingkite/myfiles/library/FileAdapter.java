@@ -11,7 +11,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
 import com.flyingkite.myfiles.R;
 
 import java.io.File;
@@ -39,7 +38,6 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
         }
 
         default void onAction(File item, FileVH vh, int position) {
-
         }
 
     }
@@ -64,7 +62,6 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
         return spaces;
     }
 
-
     public boolean isInSelectionMode() {
         return selectedIndex.size() > 0;
     }
@@ -85,7 +82,8 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
 
     public void removeSelect(int index) {
         boolean ok = selectedIndex.remove(index);
-        if (selectedIndex.isEmpty()) {
+        boolean notifyAll = selectedIndex.isEmpty();
+        if (notifyAll) {
             notifyDataSetChanged();
         } else if (ok) {
             notifyItemChanged(index);
@@ -127,23 +125,39 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
         vh.info.setText(info(it, position));
         clock.tac("info");
         clock.tic();
-        vh.itemView.setBackgroundColor(colors[position % colors.length]);
+        //vh.itemView.setBackgroundColor(colors[position % colors.length]);
         clock.tac("back");
         clock.tic();
         if (it.isFile()) {
             if (FileUtil.isAPK(it)) {
                 Drawable icon = packageManager.getPackageIcon(path);
                 //CharSequence appName = packageManager.getPackageLabel(path);
-                Glide.with(vh.thumb).load(it).placeholder(icon).into(vh.thumb);
+                //Glide.with(vh.thumb).load(it).placeholder(icon).into(vh.thumb); // fail in android 12 resume
+                vh.thumb.setImageDrawable(icon);
             } else {
-                Glide.with(vh.thumb).load(it).placeholder(R.mipmap.ic_launcher_round).into(vh.thumb);
+                int icon = R.mipmap.ic_launcher_round;
+                if (FileUtil.isPDF(path)) {
+                    icon = R.drawable.pdf;
+                } else if (FileUtil.isMicrosoftWord(path)) {
+                    icon = R.drawable.ms_word;
+                } else if (FileUtil.isMicrosoftExcel(path)) {
+                    icon = R.drawable.ms_xls;
+                } else if (FileUtil.isMicrosoftPowerPoint(path)) {
+                    icon = R.drawable.ms_ppt;
+                } else if (FileUtil.isTXT(path)) {
+                    icon = R.drawable.txt;
+                } else if (FileUtil.isJson(path)) {
+                    icon = R.drawable.json;
+                }
+                //Glide.with(vh.thumb).load(it).placeholder(icon).into(vh.thumb);
+                vh.thumb.setImageResource(icon);
             }
         } else {
             vh.thumb.setImageResource(R.drawable.baseline_folder_24);
         }
         clock.tac("Glide");
+        vh.sizePart.setVisibility(spaces.containsKey(it) ? View.VISIBLE : View.GONE);
         long rate = 0;
-
         if (spaces.containsKey(it)) {
             FileInfo info = spaces.get(it);
             logE("info = %s for it = %s", info, it);
@@ -159,7 +173,7 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
                     rate = max;
                 }
             }
-            vh.sizeB.setText(rate + "%% " + FileUtil.toGbMbKbB(me));
+            vh.sizeB.setText(_fmt("%2.2f%% %s", rate * 0.01, FileUtil.toGbMbKbB(me)));
         } else {
             vh.sizeB.setText("");
         }
@@ -189,8 +203,7 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
         String si = "";
         boolean isDir = f.isDirectory();
         if (isDir) {
-            String[] fs = null;
-            fs = f.list();
+            String[] fs = f.list();
             if (fs != null) {
                 Arrays.sort(fs);
             }
@@ -214,6 +227,7 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
         public ImageView thumb;
         public View action;
         public CheckBox selected;
+        public View sizePart;
         public ProgressBar sizeRate;
 
         public FileVH(@NonNull View v) {
@@ -223,6 +237,7 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
             sizeB = v.findViewById(R.id.itemSizeB);
             thumb = v.findViewById(R.id.itemThumb);
             action = v.findViewById(R.id.itemAction);
+            sizePart = v.findViewById(R.id.sizePart);
             sizeRate = v.findViewById(R.id.itemSizeRate);
             selected = v.findViewById(R.id.itemSelected);
         }

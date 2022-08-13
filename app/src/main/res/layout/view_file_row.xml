@@ -3,7 +3,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_ripple_grey">
 
     <ImageView
         android:id="@+id/itemThumb"
@@ -35,33 +36,6 @@
             tools:visibility="visible"/>
     </RelativeLayout>
 
-    <RelativeLayout
-        android:id="@+id/sizePart"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/itemThumb"
-        android:layout_alignTop="@id/itemThumb"
-        android:layout_alignBottom="@id/itemThumb"
-        android:layout_toLeftOf="@id/itemActions"
-        android:paddingHorizontal="@dimen/t10dp">
-        <ProgressBar
-            android:id="@+id/itemSizeRate"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-            tools:progress="70"
-            android:max="10000"
-            android:indeterminate="false"/>
-
-        <TextView
-            android:id="@+id/itemSizeB"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentRight="true"
-            tools:text="3 Bytes"/>
-    </RelativeLayout>
-
     <View
         android:id="@+id/itemV1"
         android:layout_width="@dimen/t3dp"
@@ -89,4 +63,26 @@
         android:layout_below="@id/itemTitle"
         tools:text="information" />
 
+    <RelativeLayout
+        android:id="@+id/sizePart"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/itemInfo"
+        android:paddingHorizontal="@dimen/t10dp">
+        <ProgressBar
+            android:id="@+id/itemSizeRate"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/t5dp"
+            tools:progress="70"
+            android:max="10000"
+            android:indeterminate="false"/>
+
+        <TextView
+            android:id="@+id/itemSizeB"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/itemSizeRate"
+            tools:text="3 Bytes"/>
+    </RelativeLayout>
 </RelativeLayout>

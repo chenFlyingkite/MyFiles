@@ -42,11 +42,12 @@
                 android:text="@string/file_menu_delete"/>
         </LinearLayout>
     </HorizontalScrollView>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/folderPath"
         android:layout_width="match_parent"
         android:layout_height="@dimen/t40dp"
-        android:layout_below="@id/topbar"/>
+        android:layout_below="@id/topbar" />
     <TextView
         android:id="@+id/parentFolder"
         android:layout_width="wrap_content"
@@ -61,7 +62,6 @@
         android:scrollbars="horizontal|vertical"
         android:scrollbarAlwaysDrawVerticalTrack="true"
         android:layout_below="@id/parentFolder"
-        android:background="#fff"
         app:fastScrollEnabled="true"
         app:fastScrollVerticalTrackDrawable="@drawable/recycler_track"
         app:fastScrollVerticalThumbDrawable="@drawable/recycler_thumb"

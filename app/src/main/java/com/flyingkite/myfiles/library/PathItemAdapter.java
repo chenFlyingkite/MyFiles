@@ -117,12 +117,7 @@ public class PathItemAdapter extends RVAdapter<File, PathItemAdapter.PathVH, Pat
             name = it.getAbsolutePath();
         }
         vh.itemPath.setText(name);
-        vh.itemPath.setTextColor(position <= nowAt ? Color.BLUE : Color.WHITE);
-    }
-
-    @Override
-    protected void onWillClickItem(File item, PathVH holder) {
-        //setNowAt(holder.getBindingAdapterPosition());
+        vh.itemPath.setTextColor(position <= nowAt ? 0xff00a2e8 : Color.WHITE); // water blue
     }
 
     public class PathVH extends RecyclerView.ViewHolder {
