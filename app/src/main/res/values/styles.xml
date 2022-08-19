@@ -6,12 +6,14 @@
         <item name="android:layout_margin">2dp</item>
     </style>
 
-    <style name="text_menu">
+    <style name="text_basic">
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="text_menu" parent="text_basic">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
-<!--        <item name="android:padding">@dimen/t10dp</item>-->
         <item name="android:textSize">@dimen/t20sp</item>
-        <item name="android:textColor">@color/white</item>
     </style>
     <style name="text_menu2" parent="text_menu">
         <item name="android:padding">@dimen/t5dp</item>
@@ -20,5 +22,15 @@
     <style name="text_menu2.MP">
         <item name="android:padding">@dimen/t10dp</item>
         <item name="android:layout_width">match_parent</item>
+    </style>
+
+    <style name="divider_vertical">
+        <item name="android:layout_width">2dp</item>
+        <item name="android:layout_height">match_parent</item>
+    </style>
+
+    <style name="divider_horizontal">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">2dp</item>
     </style>
 </resources>

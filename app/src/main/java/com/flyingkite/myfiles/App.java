@@ -6,7 +6,6 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.StatFs;
 import android.os.StrictMode;
-import android.os.storage.StorageManager;
 import androidx.core.content.FileProvider;
 import androidx.multidex.MultiDex;
 import androidx.multidex.MultiDexApplication;
@@ -107,7 +106,7 @@ public class App extends MultiDexApplication implements Loggable {
     // Copy paste at same folder
     // ------------- new created folder
 
-    public void statfs(File f) {
+    public String statfs(File f) {
         StatFs stat = new StatFs(f.getPath());
         long bytesAvailable;
         long total;
@@ -127,6 +126,7 @@ public class App extends MultiDexApplication implements Loggable {
         String all = FileUtil.toGbMbKbB(total);
         String ok = FileUtil.toGbMbKbB(bytesAvailable);
         logE("all = %s, ok = %s", all, ok);
-        StorageManager mgr = (StorageManager) getSystemService(Context.STORAGE_SERVICE);
+        return _fmt("all = %s, available = %s", all, ok);
+        //StorageManager mgr = (StorageManager) getSystemService(Context.STORAGE_SERVICE);
     }
 }

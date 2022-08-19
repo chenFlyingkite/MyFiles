@@ -2,13 +2,20 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
+    android:orientation="horizontal"
+    android:gravity="center"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content">
+    <ImageView
+        android:layout_width="@dimen/t15dp"
+        android:layout_height="@dimen/t15dp"
+        android:rotation="180"
+        android:background="#888"
+        android:src="@drawable/ic_arrow_back"/>
     <TextView
         android:id="@+id/itemPath"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:gravity="center"
         android:padding="@dimen/t10dp"
         android:background="@drawable/bg_ripple_grey"

@@ -11,13 +11,16 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.flyingkite.myfiles.R;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -70,6 +73,17 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
         return selectedIndex;
     }
 
+    public List<String> getSelectedPaths() {
+        List<String> ans = new ArrayList<>();
+        for (int x : selectedIndex) {
+            File f = itemOf(x);
+            if (f != null) {
+                ans.add(f.getAbsolutePath());
+            }
+        }
+        return ans;
+    }
+
     public void addSelect(int index) {
         boolean notifyAll = selectedIndex.isEmpty();
         boolean ok = selectedIndex.add(index);
@@ -96,6 +110,25 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
         } else {
             addSelect(index);
         }
+    }
+
+    public void toggleSelect() {
+        Set<Integer> old = new HashSet<>(selectedIndex);
+        selectedIndex.clear();
+        for (int i = 0; i < getItemCount(); i++) {
+            if (!old.contains(i)) {
+                selectedIndex.add(i);
+            }
+        }
+        notifyDataSetChanged();
+    }
+
+    public void selectAll() {
+        selectedIndex.clear();
+        for (int i = 0; i < getItemCount(); i++) {
+            selectedIndex.add(i);
+        }
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -136,6 +169,7 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
                 vh.thumb.setImageDrawable(icon);
             } else {
                 int icon = R.mipmap.ic_launcher_round;
+                //icon = R.drawable.baseline_folder_copy_24;
                 if (FileUtil.isPDF(path)) {
                     icon = R.drawable.pdf;
                 } else if (FileUtil.isMicrosoftWord(path)) {
@@ -149,8 +183,9 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
                 } else if (FileUtil.isJson(path)) {
                     icon = R.drawable.json;
                 }
-                //Glide.with(vh.thumb).load(it).placeholder(icon).into(vh.thumb);
-                vh.thumb.setImageResource(icon);
+                // load images and not images
+                Glide.with(vh.thumb).load(it).placeholder(icon).into(vh.thumb); // todo : failed with resume on list has one non image file, like text file
+                //vh.thumb.setImageResource(icon);
             }
         } else {
             vh.thumb.setImageResource(R.drawable.baseline_folder_24);

@@ -4,12 +4,21 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#000">
 
+    <ImageView
+        android:id="@+id/filesAction"
+        android:layout_width="@dimen/t50dp"
+        android:layout_height="@dimen/t50dp"
+        android:padding="@dimen/t5dp"
+        android:src="@drawable/more_vert" />
     <HorizontalScrollView
         android:id="@+id/topbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/filesAction"
+        android:background="#fff">
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="wrap_content"
@@ -21,7 +30,7 @@
             <Button
                 android:id="@+id/createFolderBtn"
                 style="@style/button"
-                android:text="@string/action_create_folder"/>
+                android:text="@string/actionCreateFolder"/>
             <ImageView
                 android:id="@+id/pasteBtn"
                 android:layout_width="@dimen/t50dp"
@@ -50,10 +59,22 @@
         android:layout_below="@id/topbar" />
     <TextView
         android:id="@+id/parentFolder"
+        style="@style/text_basic"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/folderPath"
         tools:text="parent folder"/>
+    <TextView
+        android:id="@+id/confirm"
+        style="@style/text_basic"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:gravity="center"
+        android:padding="@dimen/t20dp"
+        android:background="@drawable/bg_rect_blue"
+        android:visibility="visible"
+        android:text="Paste here"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerDisk"
@@ -62,6 +83,7 @@
         android:scrollbars="horizontal|vertical"
         android:scrollbarAlwaysDrawVerticalTrack="true"
         android:layout_below="@id/parentFolder"
+        android:layout_above="@id/confirm"
         app:fastScrollEnabled="true"
         app:fastScrollVerticalTrackDrawable="@drawable/recycler_track"
         app:fastScrollVerticalThumbDrawable="@drawable/recycler_thumb"

@@ -19,6 +19,8 @@
     <string name="open_with">以其他開啟&#8230;</string>
 
     <string name="file_menu_select">選擇</string>
+    <string name="file_menu_select_all">全選</string>
+    <string name="file_menu_select_toggle">反向選擇</string>
     <string name="file_menu_share">分享</string>
     <string name="file_menu_open_with">以其他開啟</string>
     <string name="file_menu_move_to">移動到</string>
@@ -26,6 +28,10 @@
     <string name="file_menu_rename">重新命名</string>
     <string name="file_menu_delete">刪除</string>
     <string name="file_menu_info">檔案資訊</string>
+    <string name="file_menu_create_folder">建立新資料夾</string>
+
+    <string name="move_to_here">移動到這裡</string>
+    <string name="copy_to_here">複製到這裡</string>
 
     <string name="delete_title">刪除 %s ?</string>
     <string name="delete_title_confirm">確定刪除 %s ?</string>
@@ -33,10 +39,13 @@
     <string name="update">更新</string>
     <string name="sort">排序</string>
     <string name="dfs_folder">DFS Folder</string>
-    <string name="action_create_folder">建立新資料夾</string>
-    <string name="folder_name">資料夾名稱</string>
+    <string name="actionCreateFolder">建立新資料夾</string>
+    <string name="folderName">資料夾名稱</string>
+    <string name="newFolder">新資料夾</string>
     <string name="success">成功</string>
     <string name="fail">失敗</string>
+    <string name="cancel">取消</string>
+    <string name="ok">確定</string>
 
     <!-- No translation -->
     <string name="nameAZ">nameAZ</string>
