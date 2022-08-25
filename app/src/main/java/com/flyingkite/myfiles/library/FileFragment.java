@@ -16,12 +16,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.PopupWindow;
+import android.widget.ProgressBar;
 import android.widget.RadioGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.contract.ActivityResultContract;
 import androidx.annotation.LayoutRes;
@@ -53,6 +52,7 @@ import java.util.Set;
 import flyingkite.library.android.media.MediaMetadataRetrieverUtil;
 import flyingkite.library.android.media.MimeTypeMapUtil;
 import flyingkite.library.android.util.BackPage;
+import flyingkite.library.android.util.ThreadUtil;
 import flyingkite.library.androidx.TicTac2;
 import flyingkite.library.androidx.recyclerview.CenterScroller;
 import flyingkite.library.androidx.recyclerview.Library;
@@ -72,6 +72,7 @@ public class FileFragment extends BaseFragment {
     private int fileAction = ACTION_LIST;
 
     private OnFileActions onFileActions;
+    // Interface for activity to implement
     public interface OnFileActions {
         boolean onActionPerformed(int action);
     }
@@ -94,25 +95,25 @@ public class FileFragment extends BaseFragment {
     private TicTac2 clock = new TicTac2();
     private FrameLayout frameImage;
 
-    private View filesAction;
     private TextView parentFolder;
+    // top bar views
+    private View filesAction;
     private View reload;
     private View dfsFile;
-    private TextView sortBtn;
-    private View createFolderBtn;
-    private ImageView pasteBtn;
-    private View deleteBtn;
+    private View sortBtn;
+    private View back;
+    private ProgressBar dfsPgs;
+//    private View createFolderBtn;
+//    private ImageView pasteBtn;
+//    private View deleteBtn;
 
     //--
     private TextView confirm;
     private PopupMenu filesMenu;
 
-
-
     // states
-    private File parentNowAt = Environment.getExternalStorageDirectory();
-    private int moveTo;
-    private File moveSrcFile;
+    private static final File ROOT_EXTERNAL = Environment.getExternalStorageDirectory();
+    private File parentNowAt = ROOT_EXTERNAL;
 
     private String state;
     private FilePreference filePref = new FilePreference();
@@ -162,7 +163,7 @@ public class FileFragment extends BaseFragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        parentNowAt = Environment.getExternalStorageDirectory();
+        parentNowAt = ROOT_EXTERNAL;
         parseArg();
         pathItems.add(parentNowAt);
         init();
@@ -177,7 +178,7 @@ public class FileFragment extends BaseFragment {
 
         String path = b.getString(EXTRA_PATH);
         if (TextUtils.isEmpty(path)) {
-            parentNowAt = Environment.getExternalStorageDirectory();
+            parentNowAt = ROOT_EXTERNAL;
         } else {
             parentNowAt = new File(path);
         }
@@ -208,6 +209,7 @@ public class FileFragment extends BaseFragment {
                 logE("X_X move to : %s", action(fileAction));
             }
         });
+        dfsPgs = findViewById(R.id.dfsProgress);
         inflateFilesMenu(findViewById(R.id.filesAction));
     }
 
@@ -279,6 +281,10 @@ public class FileFragment extends BaseFragment {
     }
 
     private void initDisk() {
+        back = findViewById(R.id.backBtn);
+        back.setOnClickListener((v) -> {
+            onBackPressed();
+        });
         filesAction = findViewById(R.id.filesAction);
         filesAction.setOnClickListener((v) -> {
             prepareFilesMenu();
@@ -291,65 +297,18 @@ public class FileFragment extends BaseFragment {
         });
         dfsFile = findViewById(R.id.dfsSize);
         dfsFile.setOnClickListener((v) -> {
-            Map<File, FileInfo> spaces = getFileSizes(parentNowAt);
-            diskLib.adapter.setSpaces(spaces);
-            reloadMe();
+            getFileSizes(parentNowAt);
+//            Map<File, FileInfo> spaces = getFileSizes(parentNowAt);
+//            diskLib.adapter.setSpaces(spaces);
+//            reloadMe();
         });
         sortBtn = findViewById(R.id.sortBtn);
         sortBtn.setOnClickListener((v) -> {
             showSortMenu(v);
         });
-        createFolderBtn = findViewById(R.id.createFolderBtn);
-        createFolderBtn.setOnClickListener((v) -> {
-            createFolderAt(parentNowAt);
-        });
-        pasteBtn = findViewById(R.id.pasteBtn);
-        pasteBtn.setOnClickListener((v) -> {
-            if (moveSrcFile == null) return;
-            String name = moveSrcFile.getName();
-            String path = moveSrcFile.getAbsolutePath();
-            File dst = FileUtil.getUnconflictFile(parentNowAt, name);
-            logE("name = %s, dst = %s", name, dst);
-            if (moveTo == 1) {
-                // move
-                boolean ok = moveSrcFile.renameTo(dst);
-                Toast.makeText(getContext(), "ok = " + ok, Toast.LENGTH_SHORT).show();
-            } else if (moveTo == 2) {
-                // copy
-                List<File> dfs = FileUtil.listAllFiles(moveSrcFile);
-                logE("dfs get %s items", dfs.size());
-                for (int i = 0; i < dfs.size(); i++) {
-                    logE("#%s : %s", i, dfs.get(i));
-                }
-                // this is test
-//                List<File> bfs = FileUtil.listAllFilesBFS(moveSrcFile);
-//                logE("bfs get %s items", bfs.size());
-//                for (int i = 0; i < bfs.size(); i++) {
-//                    logE("#%s : %s", i, bfs.get(i));
-//                }
-                for (int i = 0; i < dfs.size(); i++) {
-                    File next = dfs.get(i);
-                    String newPath = next.getAbsolutePath().replaceFirst(path, dst.getAbsolutePath());
-                    File newItem = new File(newPath);
-                    FileUtil.copy(newItem, next);
-                    logE("new as exist = %s, %s", newItem.exists(), newItem);
-                }
 
-                Toast.makeText(getContext(), "copy ok", Toast.LENGTH_SHORT).show();
-            }
-            moveSrcFile = null;
-            moveTo = 0;
-            updateMove();
-            reloadMe();
-        });
-        deleteBtn = findViewById(R.id.deleteBtn);
-        deleteBtn.setOnClickListener((v) -> {
-            List<String> chosen = fileAdapter.getSelectedPaths();
-            deleteFiles(chosen);
-        });
-
-        updateDelete();
-        updateMove();
+        //updateDelete();
+        //updateMove();
 
         parentFolder = findViewById(R.id.parentFolder);
         initDiskLib();
@@ -383,18 +342,6 @@ public class FileFragment extends BaseFragment {
     private void clearSelection() {
         fileAdapter.getSelectedIndex().clear();
         fileAdapter.notifyDataSetChanged();
-        updateDelete();
-    }
-
-    private void updateDelete() {
-        deleteBtn.setEnabled(fileAdapter.isInSelectionMode());
-    }
-
-
-    private void updateMove() {
-        final int[] src = {R.drawable.baseline_folder_24, R.drawable.baseline_file_open_24, R.drawable.baseline_folder_copy_24};
-        pasteBtn.setEnabled(moveSrcFile != null);
-        pasteBtn.setImageResource(src[moveTo]);
     }
 
     private void initPathLib() {
@@ -434,7 +381,6 @@ public class FileFragment extends BaseFragment {
             public void onClick(File item, FileAdapter.FileVH holder, int position) {
                 if (fileAdapter.isInSelectionMode()) {
                     fileAdapter.toggleSelect(position);
-                    updateDelete();
                     return;
                 }
 
@@ -472,7 +418,6 @@ public class FileFragment extends BaseFragment {
             public boolean onLongClick(File item, FileAdapter.FileVH holder, int position) {
                 if (!fileAdapter.isInSelectionMode()) {
                     fileAdapter.addSelect(position);
-                    updateDelete();
                 }
                 return true;
             }
@@ -514,6 +459,7 @@ public class FileFragment extends BaseFragment {
     }
 
     private void prepareFilesMenu() {
+        clock.tic();
         Set<Integer> all = new HashSet<>();
         all.add(R.id.itemSelectAll);
         all.add(R.id.itemSelectToggle);
@@ -525,6 +471,10 @@ public class FileFragment extends BaseFragment {
         if (fileAction == ACTION_LIST) {
             if (fileAdapter.isInSelectionMode()) {
                 show.remove(R.id.itemCreateFolder);
+            } else {
+                show.remove(R.id.itemMoveTo);
+                show.remove(R.id.itemCopyTo);
+                show.remove(R.id.itemDelete);
             }
         } else if (fileAction == ACTION_MOVE) {
             show.remove(R.id.itemSelectAll);
@@ -547,6 +497,7 @@ public class FileFragment extends BaseFragment {
                 it.setVisible(false);
             }
         }
+        clock.tac("prepareFilesMenu");
     }
 
     private void inflateFilesMenu(View anchor) {
@@ -664,13 +615,13 @@ public class FileFragment extends BaseFragment {
             } else if (id == R.id.itemOpenWith) {
                 openWith(item);
             } else if (id == R.id.itemMoveTo) {
-                moveSrcFile = item;
-                moveTo = 1;
-                updateMove();
+                fileAdapter.addSelect(position);
+                moveIntent();
+                fileAdapter.removeSelect(position);
             } else if (id == R.id.itemCopyTo) {
-                moveSrcFile = item;
-                moveTo = 2;
-                updateMove();
+                fileAdapter.addSelect(position);
+                copyIntent();
+                fileAdapter.removeSelect(position);
             } else if (id == R.id.itemRename) {
                 new RenameFileDialog(a, item, new ActionListener() {
                     @Override
@@ -690,7 +641,6 @@ public class FileFragment extends BaseFragment {
                 new FileInfoDialog(a, item, null).buildAndShow();
             } else if (id == R.id.itemSelect) {
                 fileAdapter.toggleSelect(position);
-                updateDelete();
             } else if (id == R.id.itemTitle) {
                 File f = parentNowAt;
                 f = item;
@@ -749,7 +699,7 @@ public class FileFragment extends BaseFragment {
 
     private void updateSortState() {
         String text = FilePreference.sortString();
-        sortBtn.setText("Sort = " + text);
+        //sortBtn.setText("Sort = " + text);
     }
 
     private void openImage(File item) {
@@ -850,8 +800,13 @@ public class FileFragment extends BaseFragment {
             return true;
         }
 
+        return backToParentFolder();
+    }
+
+    private boolean backToParentFolder() {
         // Back to parent folder
-        if (parentNowAt != null) {
+        boolean valid = false == ROOT_EXTERNAL.equals(parentNowAt) && parentNowAt != null;
+        if (valid) {
             File p = parentNowAt.getParentFile();
             pathItemAdapter.moveTo(p);
             if (p != null) {
@@ -871,14 +826,55 @@ public class FileFragment extends BaseFragment {
         return false;
     }
 
-    private Map<File, FileInfo> getFileSizes(File root) {
-        Map<File, FileInfo> map = FileUtil.getFileInfoMap(root, new FileUtil.OnDFSFile<>() {
-            @Override
-            public void onStart(File f) {
-                // empty
-            }
+    private void getFileSizes(File root) {
+        ThreadUtil.runOnUiThread(() -> {
+            final int[] pgsMax = {0, 1};
+            Runnable r = () -> {
+                logE("%s / %s", pgsMax[0], pgsMax[1]);
+                dfsPgs.setMax(pgsMax[1]);
+                dfsPgs.setProgress(pgsMax[0]);
+            };
+            r.run();
+            dfsPgs.setVisibility(View.VISIBLE);
+            ThreadUtil.runOnWorkerThread(() -> {
+                Map<File, FileInfo> map = FileUtil.getFileInfoMap(root, new FileUtil.OnDFSFile<>() {
+                    @Override
+                    public void onStart(File f) {
+                    }
+
+                    @Override
+                    public File[] onFileListed(File root, File[] sub) {
+//                        if (sub != null) {
+//                            pgsMax[1] += sub.length;
+//                            logE("file listed %s / %s", pgsMax[0], pgsMax[1]);
+//                            ThreadUtil.runOnUiThread(r);
+//                        }
+                        return sub;
+                    }
+
+                    @Override
+                    public void onFileInfo(File f, FileInfo info) {
+//                        pgsMax[0]++;
+//                        logE("file info %s / %s", pgsMax[0], pgsMax[1]);
+//                        ThreadUtil.runOnUiThread(r);
+                    }
+
+                    @Override
+                    public void onFileVisited(int visited, int found) {
+                        pgsMax[0] = visited;
+                        pgsMax[1] = found;
+                        ThreadUtil.runOnUiThread(r);
+                    }
+                });
+                // Ended
+                ThreadUtil.runOnUiThread(() -> {
+                    dfsPgs.setVisibility(View.GONE);
+                    Map<File, FileInfo> spaces = map;
+                    diskLib.adapter.setSpaces(spaces);
+                    reloadMe();
+                });
+            });
         });
-        return map;
     }
 
     private void updateFile() {

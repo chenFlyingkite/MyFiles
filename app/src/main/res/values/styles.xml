@@ -33,4 +33,10 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">2dp</item>
     </style>
+
+    <style name="basicIcon">
+        <item name="android:layout_width">@dimen/t50dp</item>
+        <item name="android:layout_height">@dimen/t50dp</item>
+        <item name="android:padding">@dimen/t5dp</item>
+    </style>
 </resources>

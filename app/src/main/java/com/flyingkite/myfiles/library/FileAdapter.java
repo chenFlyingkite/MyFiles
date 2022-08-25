@@ -138,6 +138,7 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
             context = parent.getContext();
             packageManager = new PackageManagerUtil(context);
         }
+        logE("onCreateViewHolder(%s)", viewType);
         return new FileVH(inflateView(parent, R.layout.view_file_row));
     }
 
@@ -145,6 +146,7 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
     public void onBindViewHolder(FileVH vh, int position) {
         super.onBindViewHolder(vh, position);
         clock.enable(false);
+        logE("onBind %s", position);
         clock.tic();
         clock.tic();
 
@@ -168,7 +170,7 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
                 //Glide.with(vh.thumb).load(it).placeholder(icon).into(vh.thumb); // fail in android 12 resume
                 vh.thumb.setImageDrawable(icon);
             } else {
-                int icon = R.mipmap.ic_launcher_round;
+                int icon = 0;
                 //icon = R.drawable.baseline_folder_copy_24;
                 if (FileUtil.isPDF(path)) {
                     icon = R.drawable.pdf;
@@ -183,9 +185,14 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
                 } else if (FileUtil.isJson(path)) {
                     icon = R.drawable.json;
                 }
-                // load images and not images
-                Glide.with(vh.thumb).load(it).placeholder(icon).into(vh.thumb); // todo : failed with resume on list has one non image file, like text file
-                //vh.thumb.setImageResource(icon);
+                if (icon == 0) {
+                    // load images and not images
+                    icon = R.mipmap.ic_launcher_round;
+                    Glide.with(vh.thumb).load(it).placeholder(icon).into(vh.thumb); // todo : failed with resume on list has one non image file, like text file
+                } else {
+                    //icon = R.mipmap.ic_launcher_round;
+                    vh.thumb.setImageResource(icon);
+                }
             }
         } else {
             vh.thumb.setImageResource(R.drawable.baseline_folder_24);
