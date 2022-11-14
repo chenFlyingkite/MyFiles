@@ -9,9 +9,14 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.flyingkite.myfiles.R;
 
 import java.io.File;
@@ -188,7 +193,27 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
                 if (icon == 0) {
                     // load images and not images
                     icon = R.mipmap.ic_launcher_round;
-                    Glide.with(vh.thumb).load(it).placeholder(icon).into(vh.thumb); // todo : failed with resume on list has one non image file, like text file
+                    Glide.with(vh.thumb).load(it)
+                            //.placeholder(icon)
+                            .listener(new RequestListener<>() {
+                        @Override
+                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                            logE("onLoadFailed 1st = %s, %s", isFirstResource, it);
+                            if (e != null) {
+                                e.printStackTrace();
+                            }
+                            int ic = R.mipmap.ic_launcher_round;
+                            vh.thumb.setImageResource(ic);
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                            logE("onResourceReady, 1st = %s, %s, %s", isFirstResource, it, resource);
+                            return false;
+                        }
+                    }).into(vh.thumb); // todo : failed with resume on list has one non image file, like text file
+                    //vh.thumb.setImageResource(icon);
                 } else {
                     //icon = R.mipmap.ic_launcher_round;
                     vh.thumb.setImageResource(icon);

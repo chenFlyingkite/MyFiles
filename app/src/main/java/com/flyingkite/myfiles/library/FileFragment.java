@@ -298,17 +298,11 @@ public class FileFragment extends BaseFragment {
         dfsFile = findViewById(R.id.dfsSize);
         dfsFile.setOnClickListener((v) -> {
             getFileSizes(parentNowAt);
-//            Map<File, FileInfo> spaces = getFileSizes(parentNowAt);
-//            diskLib.adapter.setSpaces(spaces);
-//            reloadMe();
         });
         sortBtn = findViewById(R.id.sortBtn);
         sortBtn.setOnClickListener((v) -> {
             showSortMenu(v);
         });
-
-        //updateDelete();
-        //updateMove();
 
         parentFolder = findViewById(R.id.parentFolder);
         initDiskLib();
@@ -844,19 +838,11 @@ public class FileFragment extends BaseFragment {
 
                     @Override
                     public File[] onFileListed(File root, File[] sub) {
-//                        if (sub != null) {
-//                            pgsMax[1] += sub.length;
-//                            logE("file listed %s / %s", pgsMax[0], pgsMax[1]);
-//                            ThreadUtil.runOnUiThread(r);
-//                        }
                         return sub;
                     }
 
                     @Override
                     public void onFileInfo(File f, FileInfo info) {
-//                        pgsMax[0]++;
-//                        logE("file info %s / %s", pgsMax[0], pgsMax[1]);
-//                        ThreadUtil.runOnUiThread(r);
                     }
 
                     @Override
