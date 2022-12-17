@@ -1,8 +1,6 @@
 <resources>
     <string name="app_name">My Files</string>
 
-    <string name="file_item">%s items</string>
-
     <string name="fileList_Name_A_to_Z">Name (A to Z)</string>
     <string name="fileList_Name_Z_to_A">Name (Z to A)</string>
     <string name="fileList_Size_small_to_large">Size (small to large)</string>
@@ -13,39 +11,49 @@
     <string name="fileInfo_Date_Modified">Date Modified : %s</string>
     <string name="fileInfo_Date_Added">Date added : %s</string>
 
-    <string name="share_to">分享到&#8230;</string>
-    <string name="share">分享</string>
+    <string name="share_to">Share to &#8230;</string>
+    <string name="share">Share</string>
 
-    <string name="open_with">以其他開啟&#8230;</string>
+    <string name="open_with">Open with &#8230;</string>
 
-    <string name="file_menu_select">選擇</string>
-    <string name="file_menu_select_all">全選</string>
-    <string name="file_menu_select_toggle">反向選擇</string>
-    <string name="file_menu_share">分享</string>
-    <string name="file_menu_open_with">以其他開啟</string>
-    <string name="file_menu_move_to">移動到</string>
-    <string name="file_menu_copy_to">複製到</string>
-    <string name="file_menu_rename">重新命名</string>
-    <string name="file_menu_delete">刪除</string>
-    <string name="file_menu_info">檔案資訊</string>
-    <string name="file_menu_create_folder">建立新資料夾</string>
+    <string name="file_menu_select">Select</string>
+    <string name="file_menu_select_all">Select All</string>
+    <string name="file_menu_select_toggle">Select Invert</string>
+    <string name="file_menu_share">Share</string>
+    <string name="file_menu_open_with">Open with</string>
+    <string name="file_menu_move_to">Move to</string>
+    <string name="file_menu_copy_to">Copy to</string>
+    <string name="file_menu_rename">Rename</string>
+    <string name="file_menu_delete">Delete</string>
+    <string name="file_menu_info">Information</string>
+    <string name="file_menu_create_folder">Create New Folder</string>
 
-    <string name="move_to_here">移動到這裡</string>
-    <string name="copy_to_here">複製到這裡</string>
+    <string name="move_to_here">Move to here</string>
+    <string name="copy_to_here">Copy to here</string>
 
-    <string name="delete_title">刪除 %s ?</string>
-    <string name="delete_title_confirm">確定刪除 %s ?</string>
+    <string name="delete_title">Delete %s ?</string>
+    <string name="delete_title_confirm">Confirm to delete %s ?</string>
 
-    <string name="update">更新</string>
-    <string name="sort">排序</string>
+    <string name="update">Update</string>
+    <string name="sort">Sort</string>
     <string name="dfs_folder">DFS Folder</string>
-    <string name="actionCreateFolder">建立新資料夾</string>
-    <string name="folderName">資料夾名稱</string>
-    <string name="newFolder">新資料夾</string>
-    <string name="success">成功</string>
-    <string name="fail">失敗</string>
-    <string name="cancel">取消</string>
-    <string name="ok">確定</string>
+    <string name="actionCreateFolder">Create Folder</string>
+    <string name="folderName">Folder name</string>
+    <string name="newFolder">New folder</string>
+    <string name="success">Success</string>
+    <string name="fail">Fail</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
+
+    <string name="items_no">No items</string>
+    <string name="items">%d items</string>
+    <string name="items_selected">%d items selected</string>
+
+    <string name="storage_location">Storage location</string>
+    <string name="external">External</string>
+    <string name="SD_card">SD card</string>
+    <string name="status_list">%d items, %d directories, %d files (%dms)</string>
+    <string name="percent_size">%.2f%% %s</string>
 
     <!-- No translation -->
     <string name="nameAZ">nameAZ</string>

@@ -8,10 +8,28 @@
     android:background="#000"
     tools:context=".MainActivity">
 
+    <LinearLayout
+        android:id="@+id/storage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <TextView
+            android:id="@+id/storageExternal"
+            style="@style/storageItem"
+            android:text="@string/external"/>
+
+        <TextView
+            android:id="@+id/storageSDCard1"
+            style="@style/storageItem"
+            android:text="@string/SD_card"/>
+
+    </LinearLayout>
+
     <HorizontalScrollView
         android:id="@+id/topBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/storage"
         android:visibility="gone">
 
         <LinearLayout
@@ -72,6 +90,6 @@
         android:id="@+id/fileFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/topBar">
+        android:layout_below="@id/storage">
     </FrameLayout>
 </RelativeLayout>

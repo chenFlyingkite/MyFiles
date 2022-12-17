@@ -9,14 +9,9 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.load.engine.GlideException;
-import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.Target;
 import com.flyingkite.myfiles.R;
 
 import java.io.File;
@@ -143,15 +138,14 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
             context = parent.getContext();
             packageManager = new PackageManagerUtil(context);
         }
-        logE("onCreateViewHolder(%s)", viewType);
         return new FileVH(inflateView(parent, R.layout.view_file_row));
     }
 
     @Override
     public void onBindViewHolder(FileVH vh, int position) {
         super.onBindViewHolder(vh, position);
+        Context c = vh.itemView.getContext();
         clock.enable(false);
-        logE("onBind %s", position);
         clock.tic();
         clock.tic();
 
@@ -162,13 +156,15 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
         vh.name.setText(it.getName());
         clock.tac("name");
         clock.tic();
-        vh.info.setText(info(it, position));
+        vh.info.setText(info(it));
         clock.tac("info");
         clock.tic();
         //vh.itemView.setBackgroundColor(colors[position % colors.length]);
         clock.tac("back");
         clock.tic();
-        if (it.isFile()) {
+        if (it.isDirectory()) {
+            vh.thumb.setImageResource(R.drawable.baseline_folder_24);
+        } else {
             if (FileUtil.isAPK(it)) {
                 Drawable icon = packageManager.getPackageIcon(path);
                 //CharSequence appName = packageManager.getPackageLabel(path);
@@ -176,7 +172,7 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
                 vh.thumb.setImageDrawable(icon);
             } else {
                 int icon = 0;
-                //icon = R.drawable.baseline_folder_copy_24;
+                //icon = R.drawable.icon_file;
                 if (FileUtil.isPDF(path)) {
                     icon = R.drawable.pdf;
                 } else if (FileUtil.isMicrosoftWord(path)) {
@@ -190,47 +186,42 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
                 } else if (FileUtil.isJson(path)) {
                     icon = R.drawable.json;
                 }
-                if (icon == 0) {
-                    // load images and not images
-                    icon = R.mipmap.ic_launcher_round;
-                    Glide.with(vh.thumb).load(it)
-                            //.placeholder(icon)
-                            .listener(new RequestListener<>() {
-                        @Override
-                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                            logE("onLoadFailed 1st = %s, %s", isFirstResource, it);
-                            if (e != null) {
-                                e.printStackTrace();
-                            }
-                            int ic = R.mipmap.ic_launcher_round;
-                            vh.thumb.setImageResource(ic);
-                            return false;
-                        }
-
-                        @Override
-                        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                            logE("onResourceReady, 1st = %s, %s, %s", isFirstResource, it, resource);
-                            return false;
-                        }
-                    }).into(vh.thumb); // todo : failed with resume on list has one non image file, like text file
-                    //vh.thumb.setImageResource(icon);
-                } else {
-                    //icon = R.mipmap.ic_launcher_round;
+                boolean useGlide = path.startsWith("Android/data/");
+                if (icon != 0) {
                     vh.thumb.setImageResource(icon);
+                } else {
+                    Glide.with(vh.thumb).load(it)
+                            .placeholder(R.drawable.icon_file)
+//                        .listener(new RequestListener<>() {
+//                        @Override
+//                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+//                            logE("onLoadFailed 1st = %s, %s", isFirstResource, it);
+//                            if (e != null) {
+//                                e.printStackTrace();
+//                            }
+//                            int ic = R.mipmap.ic_launcher_round;
+//                            vh.thumb.setImageResource(ic);
+//                            return false;
+//                        }
+//
+//                        @Override
+//                        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+//                            logE("onResourceReady, 1st = %s, %s, %s", isFirstResource, it, resource);
+//                            return false;
+//                        }
+//                    })
+                            .into(vh.thumb); // todo : failed with resume on list has one non image file, like text file
                 }
             }
-        } else {
-            vh.thumb.setImageResource(R.drawable.baseline_folder_24);
         }
         clock.tac("Glide");
-        vh.sizePart.setVisibility(spaces.containsKey(it) ? View.VISIBLE : View.GONE);
+        boolean spaceInfo = spaces != null && spaces.containsKey(it);
         long rate = 0;
-        if (spaces.containsKey(it)) {
+        if (spaceInfo) {
+            long max = vh.sizeRate.getMax();
             FileInfo info = spaces.get(it);
-            logE("info = %s for it = %s", info, it);
             long me = info.fileSize;
             File par = it.getParentFile();
-            long max = vh.sizeRate.getMax();
             if (me > 0 && par != null && spaces.containsKey(par)) {
                 FileInfo parFI = spaces.get(par);
                 long parMe = parFI.fileSize;
@@ -240,9 +231,10 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
                     rate = max;
                 }
             }
-            vh.sizeB.setText(_fmt("%2.2f%% %s", rate * 0.01, FileUtil.toGbMbKbB(me)));
+            vh.sizeB.setText(c.getString(R.string.percent_size, rate * 0.01, FileUtil.toGbMbKbB(me)));
+            vh.sizePart.setVisibility(View.VISIBLE);
         } else {
-            vh.sizeB.setText("");
+            vh.sizePart.setVisibility(View.GONE);
         }
         vh.sizeRate.setProgress((int) rate);
         clock.tac("#onBind %s : %s", position, it);
@@ -262,7 +254,7 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
         vh.selected.setChecked(selectedIndex.contains(position));
     }
 
-    private String info(File f, int at) {
+    private String info(File f) {
         if (f == null) return "";
 
         clock.tic();
@@ -274,8 +266,11 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
             if (fs != null) {
                 Arrays.sort(fs);
             }
-            String n = fs == null ? "no" : (fs.length + "");
-            si += context.getString(R.string.file_item, n);
+            if (fs == null) {
+                si = context.getString(R.string.items_no);
+            } else {
+                si = context.getString(R.string.items, fs.length);
+            }
             clock.tac("list %s", si);
         } else {
             long size = f.length();
@@ -283,11 +278,10 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
             clock.tac("size %s", si);
         }
 
-        return _fmt("#%d : %s, %s", at, time, si);
+        return _fmt("%s, %s", time, si);
     }
 
     public static class FileVH extends RecyclerView.ViewHolder {
-
         public TextView info;
         public TextView name;
         public TextView sizeB;

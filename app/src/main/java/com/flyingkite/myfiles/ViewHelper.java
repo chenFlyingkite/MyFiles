@@ -6,7 +6,7 @@ import android.view.inputmethod.InputMethodManager;
 import androidx.annotation.IdRes;
 import androidx.annotation.Nullable;
 
-public interface ViewUtil {
+public interface ViewHelper {
     @Nullable
     View getView();
 
@@ -41,12 +41,6 @@ public interface ViewUtil {
         int vis = show ? View.VISIBLE : View.GONE;
         v.setVisibility(vis);
     }
-
-    default void toggleSelected(View v) {
-        if (v == null) return;
-        v.setSelected(!v.isSelected());
-    }
-
     default void setViewVisibility(@IdRes int parent, boolean show) {
         setViewVisibility(findViewById(parent), show);
     }

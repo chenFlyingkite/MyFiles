@@ -2,18 +2,18 @@ package com.flyingkite.myfiles;
 
 import android.content.Context;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Environment;
-import android.os.StatFs;
 import android.os.StrictMode;
 import androidx.core.content.FileProvider;
 import androidx.multidex.MultiDex;
 import androidx.multidex.MultiDexApplication;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
+import flyingkite.library.android.data.StatFsData;
 import flyingkite.library.android.log.Loggable;
-import flyingkite.library.java.util.FileUtil;
 
 public class App extends MultiDexApplication implements Loggable {
     public static App me;
@@ -35,16 +35,7 @@ public class App extends MultiDexApplication implements Loggable {
 //        FabricAnswers.logAppOnCreate();
 //        TosWiki.init(this);
         //initCrashHandler();
-        File[] fs = {Environment.getExternalStorageDirectory(),
-                Environment.getDataDirectory(),
-                new File("/"),
-        };
-        for (int i = 0; i < fs.length; i++) {
-            File f = fs[i];
-            logE("#%s : %s", i, f);
-            statfs(f);
-        }
-
+        listStorage();
     }
 
     private void strictMode() {
@@ -106,27 +97,29 @@ public class App extends MultiDexApplication implements Loggable {
     // Copy paste at same folder
     // ------------- new created folder
 
-    public String statfs(File f) {
-        StatFs stat = new StatFs(f.getPath());
-        long bytesAvailable;
-        long total;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-            bytesAvailable = stat.getAvailableBytes();
-            total = stat.getTotalBytes();
-            String all = FileUtil.toGbMbKbB(total);
-            String ok = FileUtil.toGbMbKbB(bytesAvailable);
-            logE("all = %s, ok = %s", all, ok);
-            bytesAvailable = stat.getAvailableBlocksLong() * stat.getBlockSizeLong();
-            total = stat.getBlockCountLong() * stat.getBlockSizeLong();
-        } else {
-            bytesAvailable = (long)stat.getBlockSize() * stat.getAvailableBlocks();
-            total = (long)stat.getBlockCount() * stat.getBlockSize();
-        }
+    public List<File> listStorage() {
+        List<File> ans = new ArrayList<>();
+        File emulated = Environment.getExternalStorageDirectory();
+        // emulated/storage/0 as first one
+        ans.add(emulated);
 
-        String all = FileUtil.toGbMbKbB(total);
-        String ok = FileUtil.toGbMbKbB(bytesAvailable);
-        logE("all = %s, ok = %s", all, ok);
-        return _fmt("all = %s, available = %s", all, ok);
-        //StorageManager mgr = (StorageManager) getSystemService(Context.STORAGE_SERVICE);
+        // Other SD cards
+        File parent = new File("/storage/");
+        File[] fs = parent.listFiles();
+        if (fs != null) {
+            for (int i = 0; i < fs.length; i++) {
+                File f = fs[i];//new File(parent, s);
+                String path = f.getAbsolutePath();
+                logE("#%s : %s", i, f);
+                if (emulated.getAbsolutePath().startsWith(path)) {
+                    // omit
+                } else if (f.isDirectory() && f.canRead()) {
+                    ans.add(f);
+                }
+                StatFsData data = new StatFsData(path);
+                logE("#%s : %s", i, data);
+            }
+        }
+        return ans;
     }
 }

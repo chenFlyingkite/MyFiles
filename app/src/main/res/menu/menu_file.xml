@@ -30,5 +30,4 @@
     <item
         android:id="@+id/itemFileInfo"
         android:title="@string/file_menu_info"/>
-
 </menu>

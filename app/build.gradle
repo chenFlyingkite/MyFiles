@@ -17,6 +17,8 @@ task MyBuildInfo {
 
 
 android {
+    namespace 'com.flyingkite.myfiles'
+
     compileSdk 32
 
     defaultConfig {
@@ -25,6 +27,7 @@ android {
         targetSdk 32
         versionCode 1
         versionName "1.0"
+        multiDexEnabled true
     }
 
     compileOptions {
@@ -89,15 +92,17 @@ dependencies {
     implementation "androidx.percentlayout:percentlayout:1.0.0"
     implementation "androidx.recyclerview:recyclerview:1.2.1"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
+    implementation "androidx.navigation:navigation-ui:2.5.3" // Navigation, NavigationUI
+    implementation "androidx.navigation:navigation-fragment:2.5.3"
 
     // See usage in https://jitpack.io/
     //api 'com.github.User:Repo:Tag'
     String ver = ''
     ver = "7864a0042f"
     //implementation "com.github.chenFlyingkite:MyAndroid:$ver"
-    api project(":CoreJava")
-    api project(":CoreAndroid")
-    api project(":CoreAndroidX")
+    implementation project(":CoreJava")
+    implementation project(":CoreAndroid")
+    implementation project(":CoreAndroidX")
 
 
     implementation 'com.github.bumptech.glide:glide:4.13.0'

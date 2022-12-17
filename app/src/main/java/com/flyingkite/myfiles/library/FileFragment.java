@@ -186,10 +186,12 @@ public class FileFragment extends BaseFragment {
         destination = b.getString(EXTRA_DESTINATION, destination);
         fileAction = b.getInt(EXTRA_ACTION, fileAction);
         logE("action = %s", fileAction);
-        logE("sourcePath = %s", sourcePaths.size());
-        for (int i = 0; i < sourcePaths.size(); i++) {
-            String f = sourcePaths.get(i);
-            logE("#%s : %s", i, f);
+        if (sourcePaths != null) {
+            logE("sourcePath = %s", sourcePaths.size());
+            for (int i = 0; i < sourcePaths.size(); i++) {
+                String f = sourcePaths.get(i);
+                logE("#%s : %s", i, f);
+            }
         }
         logE("destination = %s", destination);
     }
@@ -496,7 +498,7 @@ public class FileFragment extends BaseFragment {
 
     private void inflateFilesMenu(View anchor) {
         PopupMenu m = new PopupMenu(getContext(), anchor);
-        m.inflate(R.menu.view_files_menu);
+        m.inflate(R.menu.menu_files);
         m.setOnMenuItemClickListener((menu) -> {
             Activity a = getActivity();
             if (a == null) {
@@ -528,7 +530,8 @@ public class FileFragment extends BaseFragment {
                 List<String> chosen = fileAdapter.getSelectedPaths();
                 deleteFiles(chosen);
             } else {
-                return super.onOptionsItemSelected(menu);
+                return false;
+                //return super.onOptionsItemSelected(menu);
             }
             return true;
         });
@@ -594,7 +597,7 @@ public class FileFragment extends BaseFragment {
     private void showActionMenu(View anchor, File item, int position) {
         PopupMenu m = new PopupMenu(getContext(), anchor);
         pmenu = m;
-        m.inflate(R.menu.view_file_menu);
+        m.inflate(R.menu.menu_file);
         MenuItem it = m.getMenu().findItem(R.id.itemTitle);
         it.setTitle(item.getAbsolutePath());
         m.setOnMenuItemClickListener((menu) -> {
@@ -644,7 +647,8 @@ public class FileFragment extends BaseFragment {
             } else if (id == R.id.itemOpenWith) {
                 openWith(item);
             } else {
-                return super.onOptionsItemSelected(menu);
+                return false;
+                //return super.onOptionsItemSelected(menu);
             }
             return true;
         });
@@ -760,7 +764,7 @@ public class FileFragment extends BaseFragment {
                 }
             }
         }
-        state = String.format("%sms %s items = %s D + %s F for %s", ms, n, dn, fn, f);
+        state = App.me.getString(R.string.status_list, n, dn, fn, ms);
         diskLib.adapter.setDataList(all);
         diskLib.adapter.notifyDataSetChanged();
         updateFile();
@@ -800,6 +804,7 @@ public class FileFragment extends BaseFragment {
     private boolean backToParentFolder() {
         // Back to parent folder
         boolean valid = false == ROOT_EXTERNAL.equals(parentNowAt) && parentNowAt != null;
+        valid = true;
         if (valid) {
             File p = parentNowAt.getParentFile();
             pathItemAdapter.moveTo(p);
