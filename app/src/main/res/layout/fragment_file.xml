@@ -18,6 +18,13 @@
             android:background="@color/yellow"
             android:src="@drawable/arrow_back" />
 
+        <ImageView
+            android:id="@+id/gridBtn"
+            style="@style/basicIcon"
+            android:layout_toRightOf="@id/backBtn"
+            android:background="@color/yellow"
+            android:src="@drawable/icon_row_grid" />
+
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

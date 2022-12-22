@@ -86,10 +86,23 @@
         </LinearLayout>
     </HorizontalScrollView>
 
-    <FrameLayout
-        android:id="@+id/fileFragment"
+    <RelativeLayout
+        android:id="@+id/mainFragments"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/storage">
-    </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/sdcard1Frag"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/storage">
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/externalFrag"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+        </FrameLayout>
+    </RelativeLayout>
 </RelativeLayout>

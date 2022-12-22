@@ -27,6 +27,8 @@ import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.flyingkite.myfiles.App;
@@ -78,6 +80,8 @@ public class FileFragment extends BaseFragment {
     }
 
     private Library<FileAdapter> diskLib;
+    private LinearLayoutManager diskRowLLM;
+    private LinearLayoutManager diskGridLLM;
     private FileAdapter fileAdapter = new FileAdapter();
     private CenterScroller scroller = new CenterScroller() {
         @Override
@@ -103,9 +107,7 @@ public class FileFragment extends BaseFragment {
     private View sortBtn;
     private View back;
     private ProgressBar dfsPgs;
-//    private View createFolderBtn;
-//    private ImageView pasteBtn;
-//    private View deleteBtn;
+    private View gridBtn;
 
     //--
     private TextView confirm;
@@ -287,6 +289,17 @@ public class FileFragment extends BaseFragment {
         back.setOnClickListener((v) -> {
             onBackPressed();
         });
+        gridBtn = findViewById(R.id.gridBtn);
+        gridBtn.setOnClickListener((v) -> {
+            if (fileAdapter != null) {
+                // TODO strange, the top 5 items are still show in row & grid...
+                LinearLayoutManager next = gridBtn.isSelected() ? diskRowLLM : diskGridLLM;
+                fileAdapter.toggleGrid();
+                diskLib.recyclerView.setLayoutManager(next);
+                diskLib.adapter.notifyDataSetChanged();
+                gridBtn.setSelected(!gridBtn.isSelected());
+            }
+        });
         filesAction = findViewById(R.id.filesAction);
         filesAction.setOnClickListener((v) -> {
             prepareFilesMenu();
@@ -369,7 +382,10 @@ public class FileFragment extends BaseFragment {
     }
 
     private void initDiskLib() {
-        diskLib = new Library<>(findViewById(R.id.recyclerDisk), true);
+        Context c = getContext();
+        diskRowLLM = new LinearLayoutManager(c, RecyclerView.VERTICAL, false);
+        diskGridLLM = new GridLayoutManager(c, 2, RecyclerView.VERTICAL, false);
+        diskLib = new Library<>(findViewById(R.id.recyclerDisk), diskRowLLM);
 
         List<File> ans = new ArrayList<>();
         fileAdapter.setItemListener(new FileAdapter.ItemListener() {

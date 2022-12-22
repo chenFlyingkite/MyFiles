@@ -35,15 +35,6 @@ public interface ViewHelper {
 //        t.setMovementMethod(LinkMovementMethod.getInstance());
 //    }
 
-    default void setViewVisibility(View v, boolean show) {
-        if (v == null) return;
-
-        int vis = show ? View.VISIBLE : View.GONE;
-        v.setVisibility(vis);
-    }
-    default void setViewVisibility(@IdRes int parent, boolean show) {
-        setViewVisibility(findViewById(parent), show);
-    }
 
     default <T extends View> T findViewById(@IdRes int id) {
         View w = getView();

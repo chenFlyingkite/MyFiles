@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_ripple_grey"
+    android:padding="@dimen/t5dp">
+
+    <RelativeLayout
+        android:id="@+id/itemActions"
+        android:layout_width="@dimen/t40dp"
+        android:layout_height="@dimen/t40dp">
+
+        <ImageView
+            android:id="@+id/itemThumb"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/baseline_folder_24"/>
+
+        <CheckBox
+            android:id="@+id/itemSelected"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:buttonTint="#888"
+            android:visibility="gone"
+            tools:visibility="visible"/>
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/itemTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/itemActions"/>
+
+    <TextView
+        android:id="@+id/itemInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/itemTitle"
+        android:layout_toRightOf="@id/itemActions"/>
+
+</RelativeLayout>
