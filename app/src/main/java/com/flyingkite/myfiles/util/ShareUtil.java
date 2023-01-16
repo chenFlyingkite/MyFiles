@@ -1,4 +1,4 @@
-package com.flyingkite.myfiles;
+package com.flyingkite.myfiles.util;
 
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -6,6 +6,9 @@ import android.content.Intent;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import androidx.annotation.NonNull;
+
+import com.flyingkite.myfiles.App;
+import com.flyingkite.myfiles.R;
 
 import java.io.File;
 

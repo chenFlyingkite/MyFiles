@@ -14,7 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.flyingkite.myfiles.R;
-import com.flyingkite.myfiles.ShareUtil;
+import com.flyingkite.myfiles.util.ShareUtil;
 import com.flyingkite.myfiles.library.BaseFragment;
 
 import java.text.SimpleDateFormat;

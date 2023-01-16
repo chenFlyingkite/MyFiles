@@ -35,7 +35,7 @@ public class App extends MultiDexApplication implements Loggable {
 //        FabricAnswers.logAppOnCreate();
 //        TosWiki.init(this);
         //initCrashHandler();
-        listStorage();
+        listStorageStatFs();
     }
 
     private void strictMode() {
@@ -97,11 +97,11 @@ public class App extends MultiDexApplication implements Loggable {
     // Copy paste at same folder
     // ------------- new created folder
 
-    public List<File> listStorage() {
-        List<File> ans = new ArrayList<>();
+    public List<StatFsData> listStorageStatFs() {
+        List<StatFsData> ans = new ArrayList<>();
         File emulated = Environment.getExternalStorageDirectory();
         // emulated/storage/0 as first one
-        ans.add(emulated);
+        ans.add(new StatFsData(emulated));
 
         // Other SD cards
         File parent = new File("/storage/");
@@ -111,12 +111,12 @@ public class App extends MultiDexApplication implements Loggable {
                 File f = fs[i];//new File(parent, s);
                 String path = f.getAbsolutePath();
                 logE("#%s : %s", i, f);
+                StatFsData data = new StatFsData(path);
                 if (emulated.getAbsolutePath().startsWith(path)) {
                     // omit
                 } else if (f.isDirectory() && f.canRead()) {
-                    ans.add(f);
+                    ans.add(data);
                 }
-                StatFsData data = new StatFsData(path);
                 logE("#%s : %s", i, data);
             }
         }

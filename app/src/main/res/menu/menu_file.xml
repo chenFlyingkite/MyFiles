@@ -3,10 +3,6 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
     <item
-        android:id="@+id/itemTitle"
-        tools:title="123"
-        android:title=""/>
-    <item
         android:id="@+id/itemSelect"
         android:title="@string/file_menu_select"/>
     <item

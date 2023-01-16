@@ -22,9 +22,8 @@
             android:id="@+id/itemSelected"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:buttonTint="#888"
-            android:visibility="gone"
-            tools:visibility="visible"/>
+            tools:visibility="visible"
+            style="@style/file_checkbox" />
     </RelativeLayout>
 
     <TextView

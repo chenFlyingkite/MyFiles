@@ -32,10 +32,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.flyingkite.myfiles.App;
-import com.flyingkite.myfiles.FilePreference;
-import com.flyingkite.myfiles.FolderActivity;
+import com.flyingkite.myfiles.util.FilePreference;
+import com.flyingkite.myfiles.activity.FolderActivity;
 import com.flyingkite.myfiles.R;
-import com.flyingkite.myfiles.ShareUtil;
+import com.flyingkite.myfiles.util.ShareUtil;
 import com.flyingkite.myfiles.media.ImagePlayer;
 import com.flyingkite.myfiles.media.VideoPlayer;
 
@@ -64,6 +64,7 @@ import flyingkite.library.java.util.FileUtil;
 public class FileFragment extends BaseFragment {
     public static final String TAG = "FileFragment";
     public static final String EXTRA_PATH = "path";
+    public static final String EXTRA_ROOT = "root";
     public static final String EXTRA_ACTION = "action";
     public static final String EXTRA_SOURCES = "sources";
     public static final String EXTRA_DESTINATION = "destination";
@@ -71,12 +72,15 @@ public class FileFragment extends BaseFragment {
     public static final int ACTION_MOVE = 1;
     public static final int ACTION_COPY = 2;
     private static final String[] actionString = {"List", "Move", "Copy"};
+    public static final int ACTION_UI_SHOW = 0;
+    public static final int ACTION_UI_HIDE = 1;
     private int fileAction = ACTION_LIST;
 
     private OnFileActions onFileActions;
     // Interface for activity to implement
     public interface OnFileActions {
-        boolean onActionPerformed(int action);
+        default boolean onActionPerformed(int action) { return false; }
+        default boolean onUIAction(int action) { return false; }
     }
 
     private Library<FileAdapter> diskLib;
@@ -102,6 +106,7 @@ public class FileFragment extends BaseFragment {
     private TextView parentFolder;
     // top bar views
     private View filesAction;
+    private View onTop;
     private View reload;
     private View dfsFile;
     private View sortBtn;
@@ -116,6 +121,7 @@ public class FileFragment extends BaseFragment {
     // states
     private static final File ROOT_EXTERNAL = Environment.getExternalStorageDirectory();
     private File parentNowAt = ROOT_EXTERNAL;
+    private File rootAt = parentNowAt;
 
     private String state;
     private FilePreference filePref = new FilePreference();
@@ -183,6 +189,13 @@ public class FileFragment extends BaseFragment {
             parentNowAt = ROOT_EXTERNAL;
         } else {
             parentNowAt = new File(path);
+        }
+
+        String root = b.getString(EXTRA_ROOT);
+        if (TextUtils.isEmpty(root)) {
+            rootAt = parentNowAt;
+        } else {
+            rootAt = new File(root);
         }
         sourcePaths = b.getStringArrayList(EXTRA_SOURCES);
         destination = b.getString(EXTRA_DESTINATION, destination);
@@ -292,11 +305,9 @@ public class FileFragment extends BaseFragment {
         gridBtn = findViewById(R.id.gridBtn);
         gridBtn.setOnClickListener((v) -> {
             if (fileAdapter != null) {
-                // TODO strange, the top 5 items are still show in row & grid...
                 LinearLayoutManager next = gridBtn.isSelected() ? diskRowLLM : diskGridLLM;
                 fileAdapter.toggleGrid();
                 diskLib.recyclerView.setLayoutManager(next);
-                diskLib.adapter.notifyDataSetChanged();
                 gridBtn.setSelected(!gridBtn.isSelected());
             }
         });
@@ -304,6 +315,13 @@ public class FileFragment extends BaseFragment {
         filesAction.setOnClickListener((v) -> {
             prepareFilesMenu();
             filesMenu.show();
+        });
+        onTop = findViewById(R.id.onTop);
+        onTop.setOnClickListener((v) -> {
+            v.setSelected(!v.isSelected());
+            if (onFileActions != null) {
+                onFileActions.onUIAction(v.isSelected() ? ACTION_UI_SHOW : ACTION_UI_HIDE);
+            }
         });
         reload = findViewById(R.id.reload);
         reload.setOnClickListener((v) -> {
@@ -403,6 +421,7 @@ public class FileFragment extends BaseFragment {
                     pathItemAdapter.moveTo(item);
                     fileList(item);
                 } else {
+                    //todo Enter MediaPlayerActivity
                     // not support for image
                     long duration = MediaMetadataRetrieverUtil.extractMetadataFromFilepath(item.getAbsolutePath(), MediaMetadataRetriever.METADATA_KEY_DURATION, -1L);
                     logE("Duration = %s", duration);
@@ -614,8 +633,10 @@ public class FileFragment extends BaseFragment {
         PopupMenu m = new PopupMenu(getContext(), anchor);
         pmenu = m;
         m.inflate(R.menu.menu_file);
-        MenuItem it = m.getMenu().findItem(R.id.itemTitle);
-        it.setTitle(item.getAbsolutePath());
+        // Show open with for file item, folder has no such item
+        MenuItem it = m.getMenu().findItem(R.id.itemOpenWith);
+        it.setVisible(item.isFile());
+
         m.setOnMenuItemClickListener((menu) -> {
             Activity a = getActivity();
             if (a == null) {
@@ -799,7 +820,6 @@ public class FileFragment extends BaseFragment {
     @Override
     public boolean onBackPressed() {
         Fragment f = findFragmentById_FromChildFM(R.id.frameImage);
-        logE("f = %s", f);
         if (f instanceof BackPage) {
             BackPage b = (BackPage) f;
             if (b.onBackPressed()) {
@@ -818,27 +838,25 @@ public class FileFragment extends BaseFragment {
     }
 
     private boolean backToParentFolder() {
-        // Back to parent folder
-        boolean valid = false == ROOT_EXTERNAL.equals(parentNowAt) && parentNowAt != null;
-        valid = true;
-        if (valid) {
-            File p = parentNowAt.getParentFile();
-            pathItemAdapter.moveTo(p);
-            if (p != null) {
-                parentNowAt = p;
-                fileList(p);
-                Point pp = savedPosPop();
-                if (unstableScroll) {
-                    logE("makePoint pop = %s", pp);
-                    diskLib.recyclerView.postDelayed(() -> {
-                        scroller.scrollToLeft(pp.x);
-                        //scroller.scrollToPercent(pp.x, 0, 30, false);
-                    }, 3000);
-                }
-                return true;
-            }
+        // Back to parent folder until root
+        boolean isRoot = rootAt != null && rootAt.equals(parentNowAt);
+        if (isRoot) return false;
+
+        File p = parentNowAt.getParentFile();
+        if (p == null) return false;
+
+        pathItemAdapter.moveTo(p);
+        parentNowAt = p;
+        fileList(p);
+        Point pp = savedPosPop();
+        if (unstableScroll) {
+            logE("makePoint pop = %s", pp);
+            diskLib.recyclerView.postDelayed(() -> {
+                scroller.scrollToLeft(pp.x);
+                //scroller.scrollToPercent(pp.x, 0, 30, false);
+            }, 3000);
         }
-        return false;
+        return true;
     }
 
     private void getFileSizes(File root) {

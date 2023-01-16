@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#000"
-    tools:context=".MainActivity">
+    tools:context=".activity.MainActivity">
 
     <LinearLayout
         android:id="@+id/storage"
@@ -21,6 +21,27 @@
         <TextView
             android:id="@+id/storageSDCard1"
             style="@style/storageItem"
+            android:text="@string/SD_card"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/storageInfo"
+        android:layout_below="@id/storage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        tools:visibility="visible">
+        <TextView
+            android:id="@+id/storageInfoExternal"
+            style="@style/storageItem"
+            android:padding="@dimen/t5dp"
+            android:text="@string/external"/>
+
+        <TextView
+            android:id="@+id/storageInfoSDCard1"
+            style="@style/storageItem"
+            android:padding="@dimen/t5dp"
             android:text="@string/SD_card"/>
 
     </LinearLayout>
@@ -90,7 +111,7 @@
         android:id="@+id/mainFragments"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/storage">
+        android:layout_below="@id/storageInfo">
 
         <FrameLayout
             android:id="@+id/sdcard1Frag"

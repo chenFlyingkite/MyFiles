@@ -1,4 +1,4 @@
-package com.flyingkite.myfiles;
+package com.flyingkite.myfiles.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.flyingkite.myfiles.R;
 import com.flyingkite.myfiles.library.FileFragment;
 
 import java.util.ArrayList;

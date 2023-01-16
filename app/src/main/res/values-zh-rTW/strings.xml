@@ -55,4 +55,5 @@
     <string name="SD_card">SD 卡</string>
     <string name="status_list">%d 個項目, %d 資料夾, %d 檔案 (%d毫秒)</string>
     <string name="percent_size">%.2f%% %s</string>
+    <string name="storageState">全部: %s\n可用: %s</string>
 </resources>

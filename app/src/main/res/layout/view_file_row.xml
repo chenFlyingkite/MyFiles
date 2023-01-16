@@ -10,7 +10,8 @@
         android:id="@+id/itemMain"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:background="@drawable/bg_sky_selected">
 
         <ImageView
             android:id="@+id/itemThumb"
@@ -69,9 +70,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_centerInParent="true"
-                android:buttonTint="#888"
-                android:visibility="gone"
-                tools:visibility="visible"/>
+                tools:visibility="visible"
+                style="@style/file_checkbox" />
         </RelativeLayout>
     </LinearLayout>
 

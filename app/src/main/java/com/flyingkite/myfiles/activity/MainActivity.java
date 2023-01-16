@@ -1,4 +1,4 @@
-package com.flyingkite.myfiles;
+package com.flyingkite.myfiles.activity;
 
 import android.Manifest;
 import android.os.Build;
@@ -7,12 +7,17 @@ import android.os.Environment;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.flyingkite.myfiles.App;
+import com.flyingkite.myfiles.Lab;
+import com.flyingkite.myfiles.R;
 import com.flyingkite.myfiles.library.FileFragment;
+import com.flyingkite.myfiles.util.ViewHelper2;
 
 import java.io.File;
 import java.util.Arrays;
@@ -21,23 +26,29 @@ import java.util.List;
 import flyingkite.library.android.data.StatFsData;
 import flyingkite.library.android.util.BackPage;
 import flyingkite.library.androidx.TicTac2;
+import flyingkite.library.java.util.FileUtil;
 
-public class MainActivity extends BaseActivity implements ViewHelper2 {
+public class MainActivity extends BaseActivity implements ViewHelper2, FileFragment.OnFileActions {
 
     private TicTac2 clock = new TicTac2();
-    private View main;
+    private ViewGroup mainFrag;
     private View externalFrag;
     private View sdcard1Frag;
+    private View storageInfo;
+    private TextView externalInfo;
+    private TextView sdcard1Info;
+    private final int[] fragIDs = {R.id.externalFrag, R.id.sdcard1Frag};
+    private final int[] infoIDs = {R.id.storageInfoExternal, R.id.storageInfoSDCard1};
+    private int storageNowID;
     private View back;
     private View usages;
-    private final int[] fragIDs = {R.id.externalFrag, R.id.sdcard1Frag};
     private Lab lab = new Lab(this);
 
     private ViewGroup topStorage;
     private View topExternal;
     private View topSDCard01;
     //-- Data
-    private List<File> storages;
+    private List<StatFsData> storages;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,11 +61,11 @@ public class MainActivity extends BaseActivity implements ViewHelper2 {
     }
 
     private void init() {
-        storages = App.me.listStorage();
+        storages = App.me.listStorageStatFs();
         initTop();
-        main = findViewById(R.id.mainFragments);
-        sdcard1Frag = main.findViewById(R.id.sdcard1Frag);
-        externalFrag = main.findViewById(R.id.externalFrag);
+        mainFrag = findViewById(R.id.mainFragments);
+        sdcard1Frag = mainFrag.findViewById(R.id.sdcard1Frag);
+        externalFrag = mainFrag.findViewById(R.id.externalFrag);
         back = findViewById(R.id.backBtn);
         back.setOnClickListener((v) -> {
             onBackPressed();
@@ -65,24 +76,51 @@ public class MainActivity extends BaseActivity implements ViewHelper2 {
 
     private void initTop() {
         topStorage = findViewById(R.id.storage);
-        topExternal = findViewById(R.id.storageExternal);
         topSDCard01 = findViewById(R.id.storageSDCard1);
+        topExternal = findViewById(R.id.storageExternal);
+        storageInfo = findViewById(R.id.storageInfo);
+        sdcard1Info = findViewById(R.id.storageInfoSDCard1);
+        externalInfo = findViewById(R.id.storageInfoExternal);
         topExternal.setVisibility(View.VISIBLE);
         topSDCard01.setVisibility(storages.size() > 1 ? View.VISIBLE : View.GONE);
+        externalInfo.setVisibility(topExternal.getVisibility());
+        sdcard1Info.setVisibility(topSDCard01.getVisibility());
         topExternal.setOnClickListener((v) -> {
             selectStorage(v);
+            storageNowID = R.id.externalFrag;
             externalFrag.bringToFront();
         });
         topSDCard01.setOnClickListener((v) -> {
             selectStorage(v);
+            storageNowID = R.id.sdcard1Frag;
             sdcard1Frag.bringToFront();
         });
     }
 
+    @Override
+    public boolean onUIAction(int action) {
+        if (action == FileFragment.ACTION_UI_SHOW) {
+            storageInfo.setVisibility(View.VISIBLE);
+            return true;
+        } else if (action == FileFragment.ACTION_UI_HIDE) {
+            storageInfo.setVisibility(View.GONE);
+            return true;
+        }
+        return false;
+    }
+
     private void replaceFileFragments() {
         for (int i = 0; i < storages.size(); i++) {
-            String path = storages.get(i).getAbsolutePath();
+            StatFsData data = storages.get(i);
+            String path = data.path;
             replaceFileFragment(path, fragIDs[i], path);
+
+            //--
+            String ok = FileUtil.toGbMbKbB(data.available);
+            String all = FileUtil.toGbMbKbB(data.totalSize);
+            TextView t = findViewById(infoIDs[i]);
+            t.setText(getString(R.string.storageState, all, ok));
+            logE("#%s : path = %s", i, path);
         }
     }
 
@@ -147,14 +185,13 @@ public class MainActivity extends BaseActivity implements ViewHelper2 {
     }
 
     private boolean onBackPressedFragment() {
-        for (int i = 0; i < fragIDs.length; i++) {
-            int id = fragIDs[i];
-            Fragment ff = findFragmentById(id);
-            if (ff instanceof BackPage) {
-                BackPage b = (BackPage) ff;
-                if (b.onBackPressed()) {
-                    return true;
-                }
+        int id = storageNowID;
+
+        Fragment ff = findFragmentById(id);
+        if (ff instanceof BackPage) {
+            BackPage b = (BackPage) ff;
+            if (b.onBackPressed()) {
+                return true;
             }
         }
         return false;
@@ -165,6 +202,7 @@ public class MainActivity extends BaseActivity implements ViewHelper2 {
         if (!TextUtils.isEmpty(path)) {
             Bundle b = new Bundle();
             b.putString(FileFragment.EXTRA_PATH, path);
+            b.putString(FileFragment.EXTRA_ROOT, path);
             f.setArguments(b);
         }
         FragmentManager fm = getSupportFragmentManager();

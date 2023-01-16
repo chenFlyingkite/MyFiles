@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.flyingkite.myfiles.R;
-import com.flyingkite.myfiles.ViewHelper2;
+import com.flyingkite.myfiles.util.ViewHelper2;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -41,8 +41,7 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
             return false;
         }
 
-        default void onAction(File item, FileVH vh, int position) {
-        }
+        default void onAction(File item, FileVH vh, int position) {}
 
     }
 
@@ -72,6 +71,10 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
 
     public boolean isInSelectionMode() {
         return selectedIndex.size() > 0;
+    }
+
+    private boolean isItemSelected(int position) {
+        return selectedIndex.contains(position);
     }
 
     public Set<Integer> getSelectedIndex() {
@@ -155,25 +158,16 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
             context = parent.getContext();
             packageManager = new PackageManagerUtil(context);
         }
-        int id;
-        if (isInGrid) {
-            if (viewType == 0) {
-                id = viewIDs[1];
-            } else {
-                id = viewIDs[2];
-            }
-        } else {
-            id = viewIDs[0];
-        }
+        int id = viewIDs[viewType];
         return new FileVH(inflateView(parent, id));
     }
 
     @Override
     public int getItemViewType(int position) {
+        File it = itemOf(position);
         if (isInGrid) {
-            File it = itemOf(position);
-            if (it.isDirectory()) {
-                return 0;
+            if (it.isFile()) {
+                return 2;
             } else {
                 return 1;
             }
@@ -199,7 +193,6 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
         vh.info.setText(info(it));
         clock.tac("info");
         clock.tic();
-        //vh.itemView.setBackgroundColor(colors[position % colors.length]);
         clock.tac("back");
         clock.tic();
         ImageView demo = setupPreview(vh, it);
@@ -213,6 +206,7 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
             }
             return false;
         });
+        vh.itemView.setSelected(isItemSelected(position));
         if (vh.action != null) {
             vh.action.setVisibility(isInSelectionMode() ? View.GONE : View.VISIBLE);
             vh.action.setOnClickListener((v) -> {
@@ -291,7 +285,7 @@ public class FileAdapter extends RVAdapter<File, FileAdapter.FileVH, FileAdapter
                 if (icon != 0) {
                     thumb.setImageResource(icon);
                 } else {
-                    Glide.with(thumb).load(it)
+                    Glide.with(context).load(it).centerCrop()
                             .placeholder(R.drawable.icon_file)
 //                        .listener(new RequestListener<>() {
 //                        @Override

@@ -54,6 +54,7 @@
     <string name="SD_card">SD card</string>
     <string name="status_list">%d items, %d directories, %d files (%dms)</string>
     <string name="percent_size">%.2f%% %s</string>
+    <string name="storageState">total: %s\nfree: %s</string>
 
     <!-- No translation -->
     <string name="nameAZ">nameAZ</string>

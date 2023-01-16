@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/mainViewPager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <androidx.viewpager.widget.PagerTitleStrip
+            android:id="@+id/mainStrip"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/t5dp"
+            android:background="#f00">
+        </androidx.viewpager.widget.PagerTitleStrip>
+
+    </androidx.viewpager2.widget.ViewPager2>
+
+</RelativeLayout>

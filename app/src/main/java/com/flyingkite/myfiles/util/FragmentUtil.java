@@ -1,4 +1,4 @@
-package com.flyingkite.myfiles;
+package com.flyingkite.myfiles.util;
 
 import android.app.Activity;
 import android.view.View;

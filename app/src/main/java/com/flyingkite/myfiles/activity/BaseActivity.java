@@ -1,4 +1,4 @@
-package com.flyingkite.myfiles;
+package com.flyingkite.myfiles.activity;
 
 import android.content.Context;
 import android.content.Intent;

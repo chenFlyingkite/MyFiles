@@ -1,4 +1,4 @@
-package com.flyingkite.myfiles;
+package com.flyingkite.myfiles.util;
 
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,7 +25,6 @@ public interface ViewHelper2 extends Loggable {
         int n = vg.getChildCount();
         for (int i = 0; i < n; i++) {
             View v = vg.getChildAt(i);
-            logE("#%s : v == sel = %s", i, sel == v);
             v.setSelected(sel == v);
         }
     }

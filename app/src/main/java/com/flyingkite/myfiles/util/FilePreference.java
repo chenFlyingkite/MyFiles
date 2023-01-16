@@ -1,6 +1,9 @@
-package com.flyingkite.myfiles;
+package com.flyingkite.myfiles.util;
 
 import android.util.Pair;
+
+import com.flyingkite.myfiles.App;
+import com.flyingkite.myfiles.R;
 
 import java.io.File;
 import java.util.Arrays;
@@ -50,6 +53,19 @@ public class FilePreference extends EasyPreference {
         return App.me.getString(fileSortBy.get(at).first);
     }
 
+    // Return compare result for Folder < File, that is
+    // Return  1, If x is file, y is directory (x > y)
+    // Return -1, If x is directory, y is file (x < y)
+    // Return 0 for both x and y are directory or file
+    private static int compareFolderFile(File x, File y) {
+        boolean fx = x.isDirectory();
+        boolean fy = y.isDirectory();
+        if (fx != fy) {
+            return fx ? -1 : 1;
+        }
+        return 0;
+    }
+
     public static Comparator<File> getComparatorFileList(Map<File, FileInfo> info) {
         FilePreference pref = new FilePreference();
         String key = pref.fileSort.get();
@@ -69,6 +85,10 @@ public class FilePreference extends EasyPreference {
                 @Override
                 public int compare(File x, File y) {
                     boolean asc = sort == R.string.fileList_Date_old_to_new;
+                    int type = compareFolderFile(x, y);
+                    if (type != 0) {
+                        return type;
+                    }
                     long xn = base(x);
                     long yn = base(y);
                     if (asc) {
@@ -95,6 +115,10 @@ public class FilePreference extends EasyPreference {
                 @Override
                 public int compare(File x, File y) {
                     boolean asc = sort == R.string.fileList_Size_small_to_large;
+                    int type = compareFolderFile(x, y);
+                    if (type != 0) {
+                        return type;
+                    }
                     long xn = base(x);
                     long yn = base(y);
                     if (asc) {
@@ -110,8 +134,12 @@ public class FilePreference extends EasyPreference {
 
         return (x, y) -> {
             boolean asc = sort == R.string.fileList_Name_A_to_Z;
-            String xn = x == null ? "" : x.getName();
-            String yn = y == null ? "" : y.getName();
+            int type = compareFolderFile(x, y);
+            if (type != 0) {
+                return type;
+            }
+            String xn = x.getName();
+            String yn = y.getName();
             if (asc) {
                 // R.string.fileList_Name_A_to_Z,
                 return xn.compareTo(yn);

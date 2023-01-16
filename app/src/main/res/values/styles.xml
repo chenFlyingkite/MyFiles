@@ -49,4 +49,9 @@
         <item name="android:background">@drawable/bg_sky</item>
         <item name="android:gravity">center</item>
     </style>
+
+    <style name="file_checkbox">
+        <item name="android:buttonTint">#2AA</item>
+        <item name="android:visibility">gone</item>
+    </style>
 </resources>

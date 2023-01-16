@@ -11,6 +11,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:padding="@dimen/t5dp"
+        android:background="@drawable/bg_sky_selected"
         app:layout_widthPercent="100%"
         app:layout_aspectRatio="100%">
 
@@ -26,23 +27,25 @@
             android:layout_centerInParent="true"
             android:src="@drawable/icon_file"/>
 
-        <CheckBox
-            android:id="@+id/itemSelected"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:buttonTint="#888"
-            android:visibility="gone"
-            tools:visibility="visible"/>
-
-        <TextView
-            android:id="@+id/itemInfo"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_toRightOf="@id/itemSelected"
-            android:gravity="right"
-            android:background="@drawable/bg_black_gradient_90"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentRight="true"/>
+            android:orientation="horizontal"
+            android:background="@drawable/bg_black_gradient_90">
+
+            <CheckBox
+                android:id="@+id/itemSelected"
+                android:layout_width="@dimen/t40dp"
+                android:layout_height="@dimen/t40dp"
+                tools:visibility="visible"
+                style="@style/file_checkbox" />
+
+            <TextView
+                android:id="@+id/itemInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="right"/>
+        </LinearLayout>
 
         <TextView
             android:id="@+id/itemTitle"
